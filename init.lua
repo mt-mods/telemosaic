@@ -151,11 +151,51 @@ minetest.register_node('telemosaic:beacon_err', {
     on_rightclick = beacon_rightclick,
 })
 
+minetest.register_node('telemosaic:beacon_off', {
+    description = 'Telemosaic beacon',
+    tiles = {
+        'telemosaic_beacon_off.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+    },
+    paramtype = 'light',
+    groups = { cracky = 2 },
+    on_rightclick = beacon_rightclick,
+})
+
 
 minetest.register_tool('telemosaic:key', {
     description = 'Telemosaic key',
     inventory_image = 'telemosaic_key.png',
     stack_max = 1,
+})
+
+minetest.register_node('telemosaic:extender_one', {
+    description = 'Telemosaic extender, tier 1',
+    tiles = {
+        'telemosaic_extender_one.png',
+    },
+    paramtype = 'light',
+    groups = { cracky = 2 },
+})
+minetest.register_node('telemosaic:extender_two', {
+    description = 'Telemosaic extender, tier 2',
+    tiles = {
+        'telemosaic_extender_two.png',
+    },
+    paramtype = 'light',
+    groups = { cracky = 2 },
+})
+minetest.register_node('telemosaic:extender_three', {
+    description = 'Telemosaic extender, tier 3',
+    tiles = {
+        'telemosaic_extender_three.png',
+    },
+    paramtype = 'light',
+    groups = { cracky = 2 },
 })
 
 minetest.register_on_joinplayer(function(player)
