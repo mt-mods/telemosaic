@@ -49,7 +49,7 @@ local M = telemosaic
 local C = M.config
 
 local function hash_pos(pos)
-    return math.floor(pos.x + 0.5) .. ':' .. 
+    return math.floor(pos.x + 0.5) .. ':' ..
            math.floor(pos.y + 0.5) .. ':' ..
            math.floor(pos.z + 0.5)
 end
@@ -62,8 +62,60 @@ local function unhash_pos(hash)
     return pos
 end
 
-minetest.register_node('telemosaic:beacon', {
+local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
+    local name = itemstack:get_name()
+    --print("Clicked by a " ..name)
+    if name == 'default:mese_crystal_fragment' and itemstack:get_count() == 1 then
+        --print("Clicked by a single key")
+        itemstack = ItemStack({
+            name = "telemosaic:key",
+            count = 1,
+            wear = 0,
+            metadata = hash_pos(pointed_thing.under),
+        })
+    elseif name == 'telemosaic:key' then
+        local posstring = itemstack:get_metadata()
+        local thispos = hash_pos(pointed_thing.under)
+        --print("Key with metadata " .. posstring)
+        -- TODO: in range?
+        if posstring == thispos then
+            -- a zero-distance teleport disables the beacon - do we want this?
+            minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon_off" })
+        else
+            minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon" })
+        end
+        local meta = minetest.get_meta(pointed_thing.under)
+        meta:set_string('telemosaic:dest', posstring)
+        --print ("set to " .. meta:get_string('telemosaic:dest'))
+        itemstack = ItemStack({
+            name = "default:mese_crystal_fragment",
+            count = 1, wear = 0,
+        })
+    else
+        -- normal place-item thing
+        if itemstack:get_definition().type == "node" then
+            return core.item_place_node(itemstack, player, pointed_thing)
+        end
+    end
+    return itemstack
+end
+
+minetest.register_node('telemosaic:beacon_off', {
     description = 'Telemosaic beacon',
+    tiles = {
+        'telemosaic_beacon_off.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+    },
+    paramtype = 'light',
+    groups = { cracky = 2 },
+    on_rightclick = beacon_rightclick,
+})
+minetest.register_node('telemosaic:beacon', {
+    description = 'Telemosaic beacon (on)',
     tiles = {
         'telemosaic_beacon_top.png',
         'telemosaic_beacon_side.png',
@@ -74,31 +126,25 @@ minetest.register_node('telemosaic:beacon', {
     },
     paramtype = 'light',
     groups = { cracky = 2 },
-    on_rightclick = function(pos, node, player, itemstack, pointed_thing)
-        local name = itemstack:get_name()
-        --print("Clicked by a " ..name)
-        if name == 'default:mese_crystal_fragment' and itemstack:get_count() == 1 then
-            --print("Clicked by a single key")
-            itemstack = ItemStack({
-                name = "telemosaic:key",
-                count = 1,
-                wear = 0,
-                metadata = hash_pos(pointed_thing.under),
-            })
-        elseif name == 'telemosaic:key' then
-            local posstring = itemstack:get_metadata()
-            --print("Key with metadata " .. posstring)
-            local meta = minetest.get_meta(pointed_thing.under)
-            meta:set_string('telemosaic:dest', posstring) 
-            --print ("set to " .. meta:get_string('telemosaic:dest'))
-            itemstack = ItemStack({
-                name = "default:mese_crystal_fragment",
-                count = 1, wear = 0,
-            })
-        end
-        return itemstack
-    end
+    drop = 'telemosaic:beacon_off',
+    on_rightclick = beacon_rightclick,
 })
+minetest.register_node('telemosaic:beacon_err', {
+    description = 'Telemosaic beacon (err)',
+    tiles = {
+        'telemosaic_beacon_err.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+        'telemosaic_beacon_side.png',
+    },
+    paramtype = 'light',
+    groups = { cracky = 2 },
+    drop = 'telemosaic:beacon_off',
+    on_rightclick = beacon_rightclick,
+})
+
 
 minetest.register_tool('telemosaic:key', {
     description = 'Telemosaic key',
