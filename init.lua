@@ -31,6 +31,7 @@ telemosaic = {
     -- configuration
     config = {
         teleport_delay = 2.0, -- seconds
+        beacon_range = 20.0, -- max teleport distance
     },
 
     players = {
@@ -78,19 +79,24 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
         local thispos = hash_pos(pointed_thing.under)
         --print("Key with metadata " .. posstring)
         -- TODO: in range?
-        if posstring == thispos then
-            -- a zero-distance teleport disables the beacon - do we want this?
-            minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon_off" })
-        else
-            minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon" })
+        if posstring ~= thispos then
+            local dest_pos = unhash_pos(posstring)
+            if vector.distance(dest_pos, pointed_thing.under) <= C.beacon_range then
+                minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon" })
+            else
+                minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon_err" })
+            end
+
+            -- set the destination anyway, it just won't work as
+            -- long as the beacon is in err state
+            local meta = minetest.get_meta(pointed_thing.under)
+            meta:set_string('telemosaic:dest', posstring)
+            --print ("set to " .. meta:get_string('telemosaic:dest'))
+            itemstack = ItemStack({
+                name = "default:mese_crystal_fragment",
+                count = 1, wear = 0,
+            })
         end
-        local meta = minetest.get_meta(pointed_thing.under)
-        meta:set_string('telemosaic:dest', posstring)
-        --print ("set to " .. meta:get_string('telemosaic:dest'))
-        itemstack = ItemStack({
-            name = "default:mese_crystal_fragment",
-            count = 1, wear = 0,
-        })
     else
         -- normal place-item thing
         if itemstack:get_definition().type == "node" then
@@ -188,9 +194,13 @@ minetest.register_globalstep(function(dtime)
                     --print("Ping to " .. dest_hash)
                     local dest = unhash_pos(dest_hash)
                     dest.y = dest.y + 0.5
-                    player:setpos(dest)
-                    pl.last_pos = hash_pos(dest)
-                    pl.allow_teleport = false -- need to move first
+                    -- check for range before teleport (with leeway)
+                    local dist = vector.distance(pos, dest)
+                    if dist - 0.5 <= C.beacon_range then
+                        player:setpos(dest)
+                        pl.last_pos = hash_pos(dest)
+                        pl.allow_teleport = false -- need to move first
+                    end
                 end
             end
         end
