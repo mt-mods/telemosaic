@@ -154,7 +154,7 @@ minetest.register_node('telemosaic:beacon_err', {
 
 minetest.register_tool('telemosaic:key', {
     description = 'Telemosaic key',
-    inventory_image = 'default_mese_crystal.png',
+    inventory_image = 'telemosaic_key.png',
     stack_max = 1,
 })
 
