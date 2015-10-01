@@ -40,11 +40,12 @@ star-shaped networks are also possible. Each beacon has only a
 single destination, but can itself be the destination of several
 others.
 
+Beacons have a maximum range of 20 nodes. If the destination is
+too far away, the beacon will turn red and will not function.
+
 Future plans
 ------------
 
-* Different textures for unset and set beacons
-* Limited range for beacons
 * A separate key item, or at least for the "charged" version
 * Extenders
 * Crafting recipes for beacons and extenders
