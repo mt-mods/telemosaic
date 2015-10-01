@@ -48,6 +48,7 @@ Future plans
 * A separate key item, or at least for the "charged" version
 * Extenders
 * Crafting recipes for beacons and extenders
+* Protection for beacon destinations
 * Particle and sound effects
 * Several tiers of extenders
 * Dyeing extenders
