@@ -3,7 +3,7 @@ Telemosaic [telemosaic]
 
 A Minetest mod for user-generated teleportation pads.
 
-Version: 0.2.0
+Version: 0.3.0
 
 License:
   Code: LGPL 2.1 (see included LICENSE file)
@@ -29,11 +29,11 @@ Current behavior
 
 Beacons can be found in the creative inventory. Right-clicking a
 beacon with a default mese crystal fragment remembers the position
-in the fragment, which turns into a full mese crystal. Right-clicking
-a second beacon with the full crystal sets up a teleportation route
+in the fragment, which turns into a telemosaic key. Right-clicking
+a second beacon with the key sets up a teleportation route
 from the second beacon to the first beacon. To set up a return
 path, right-click the second beacon with the fragment, and the
-first beacon with the full crystal again.
+first beacon with the resulting key again.
 
 The beacons do not need to be strictly paired this way: rings or
 star-shaped networks are also possible. Each beacon has only a
@@ -42,12 +42,16 @@ others.
 
 Beacons have a maximum range of 20 nodes. If the destination is
 too far away, the beacon will turn red and will not function.
+To extend the range for a beacon, place "extenders" next to it,
+within a 7x7 horizontal square centered on the beacon.
+
+Extenders come in three tiers: tier 1 extends all affected beacons
+by 5 nodes, tier 2 by 20 nodes, and tier 3 by 80 nodes. Placing
+or digging extenders will update affected beacons.
 
 Future plans
 ------------
 
-* A separate key item, or at least for the "charged" version
-* Extenders
 * Crafting recipes for beacons and extenders
 * Protection for beacon destinations
 * Particle and sound effects
