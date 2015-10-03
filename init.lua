@@ -32,6 +32,12 @@ telemosaic = {
     config = {
         teleport_delay = 2.0, -- seconds
         beacon_range = 20.0, -- max teleport distance
+        extender_ranges = {
+            -- note: not adding beacons here, since they don't extend
+            ['telemosaic:extender_one'] = 5.0,
+            ['telemosaic:extender_two'] = 20.0,
+            ['telemosaic:extender_three'] = 80.0,
+        },
     },
 
     players = {
@@ -63,6 +69,18 @@ local function unhash_pos(hash)
     return pos
 end
 
+local function count_extenders(pos)
+    local extended = 0.0
+    for z=-3,3 do
+        for x=-3,3 do
+            local node = minetest.get_node({ x=pos.x+x, y=pos.y, z=pos.z+z})
+            extended = extended + ( C.extender_ranges[node.name] or 0.0 )
+        end
+    end
+    print("Total extended: " .. extended)
+    return extended
+end
+
 local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
     local name = itemstack:get_name()
     --print("Clicked by a " ..name)
@@ -81,7 +99,8 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
         -- TODO: in range?
         if posstring ~= thispos then
             local dest_pos = unhash_pos(posstring)
-            if vector.distance(dest_pos, pointed_thing.under) <= C.beacon_range then
+            local extended = count_extenders(pointed_thing.under)
+            if vector.distance(dest_pos, pointed_thing.under) <= C.beacon_range + extended then
                 minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon" })
             else
                 minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon_err" })
@@ -234,13 +253,15 @@ minetest.register_globalstep(function(dtime)
                     --print("Ping to " .. dest_hash)
                     local dest = unhash_pos(dest_hash)
                     dest.y = dest.y + 0.5
+                    local extended = count_extenders(pos)
                     -- check for range before teleport (with leeway)
                     local dist = vector.distance(pos, dest)
-                    if dist - 0.5 <= C.beacon_range then
+                    --print("Dist :" .. (dist-0.5) .. " to " .. (C.beacon_range + extended))
+                    if dist - 0.5 <= C.beacon_range + extended then
                         player:setpos(dest)
                         pl.last_pos = hash_pos(dest)
-                        pl.allow_teleport = false -- need to move first
                     end
+                    pl.allow_teleport = false -- need to move first, regardless
                 end
             end
         end
