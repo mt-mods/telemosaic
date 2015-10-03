@@ -235,6 +235,7 @@ minetest.register_tool('telemosaic:key', {
     description = 'Telemosaic key',
     inventory_image = 'telemosaic_key.png',
     stack_max = 1,
+    groups = { not_in_creative_inventory = 1 },
 })
 
 minetest.register_node('telemosaic:extender_one', {
