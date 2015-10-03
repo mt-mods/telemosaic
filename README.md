@@ -3,7 +3,7 @@ Telemosaic [telemosaic]
 
 A Minetest mod for user-generated teleportation pads.
 
-Version: 0.3.0
+Version: 0.3.1
 
 License:
   Code: LGPL 2.1 (see included LICENSE file)
