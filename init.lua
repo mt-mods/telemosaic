@@ -195,7 +195,7 @@ minetest.register_node('telemosaic:beacon', {
         'telemosaic_beacon_side.png',
     },
     paramtype = 'light',
-    groups = { cracky = 2 },
+    groups = { cracky = 2, not_in_creative_inventory = 1 },
     drop = 'telemosaic:beacon_off',
     on_rightclick = beacon_rightclick,
 })
@@ -210,7 +210,7 @@ minetest.register_node('telemosaic:beacon_err', {
         'telemosaic_beacon_side.png',
     },
     paramtype = 'light',
-    groups = { cracky = 2 },
+    groups = { cracky = 2, not_in_creative_inventory = 1 },
     drop = 'telemosaic:beacon_off',
     on_rightclick = beacon_rightclick,
 })
