@@ -77,7 +77,7 @@ local function count_extenders(pos)
             extended = extended + ( C.extender_ranges[node.name] or 0.0 )
         end
     end
-    print("Total extended: " .. extended)
+    --print("Total extended: " .. extended)
     return extended
 end
 
@@ -96,7 +96,6 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
         local posstring = itemstack:get_metadata()
         local thispos = hash_pos(pointed_thing.under)
         --print("Key with metadata " .. posstring)
-        -- TODO: in range?
         if posstring ~= thispos then
             local dest_pos = unhash_pos(posstring)
             local extended = count_extenders(pointed_thing.under)
@@ -123,6 +122,52 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
         end
     end
     return itemstack
+end
+
+local function extender_place(placepos, placer, itemstack, pointed_thing)
+    -- go over all possible *err* beacons, and update them
+    for z=-3,3 do
+        for x=-3,3 do
+            local pos = { x=placepos.x+x, y=placepos.y, z=placepos.z+z }
+            local node = minetest.get_node(pos)
+            if node ~= nil and node.name == 'telemosaic:beacon_err' then
+                -- candidate!
+                local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
+                if dest_hash ~= nil and dest_hash ~= '' then
+                    local dest = unhash_pos(dest_hash)
+                    local extended = count_extenders(pos)
+                    local dist = vector.distance(pos, dest)
+                    if dist <= C.beacon_range + extended then
+                        -- upgrade :-)
+                        minetest.swap_node(pos, { name = "telemosaic:beacon" })
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function extender_dig(digpos, oldnode, oldmetadata, digger)
+    -- go over all possible *actual* beacons, and update them
+    for z=-3,3 do
+        for x=-3,3 do
+            local pos = { x=digpos.x+x, y=digpos.y, z=digpos.z+z }
+            local node = minetest.get_node(pos)
+            if node ~= nil and node.name == 'telemosaic:beacon' then
+                -- candidate!
+                local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
+                if dest_hash ~= nil and dest_hash ~= '' then
+                    local dest = unhash_pos(dest_hash)
+                    local extended = count_extenders(pos)
+                    local dist = vector.distance(pos, dest)
+                    if dist > C.beacon_range + extended then
+                        -- downgrade :-(
+                        minetest.swap_node(pos, { name = "telemosaic:beacon_err" })
+                    end
+                end
+            end
+        end
+    end
 end
 
 minetest.register_node('telemosaic:beacon_off', {
@@ -199,6 +244,8 @@ minetest.register_node('telemosaic:extender_one', {
     },
     paramtype = 'light',
     groups = { cracky = 2 },
+    after_place_node = extender_place,
+    after_dig_node   = extender_dig,
 })
 minetest.register_node('telemosaic:extender_two', {
     description = 'Telemosaic extender, tier 2',
@@ -207,6 +254,8 @@ minetest.register_node('telemosaic:extender_two', {
     },
     paramtype = 'light',
     groups = { cracky = 2 },
+    after_place_node = extender_place,
+    after_dig_node   = extender_dig,
 })
 minetest.register_node('telemosaic:extender_three', {
     description = 'Telemosaic extender, tier 3',
@@ -215,6 +264,8 @@ minetest.register_node('telemosaic:extender_three', {
     },
     paramtype = 'light',
     groups = { cracky = 2 },
+    after_place_node = extender_place,
+    after_dig_node   = extender_dig,
 })
 
 minetest.register_on_joinplayer(function(player)
