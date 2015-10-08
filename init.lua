@@ -269,6 +269,36 @@ minetest.register_node('telemosaic:extender_three', {
     after_dig_node   = extender_dig,
 })
 
+minetest.register_craft({
+    output = 'telemosaic:beacon_off',
+    recipe = {
+        {'default:diamond', 'doors:door_wood', 'default:diamond'},
+        {'default:obsidian','default:obsidian','default:obsidian'}
+    }
+})
+minetest.register_craft({
+    output = 'telemosaic:extender_one',
+    recipe = {
+        {'default:obsidian','doors:door_wood','default:obsidian'}
+    }
+})
+minetest.register_craft({
+    output = 'telemosaic:extender_two',
+    recipe = {
+        {'', 'telemosaic:extender_one',''},
+        {'telemosaic:extender_one','default:obsidian','telemosaic:extender_one'},
+        {'', 'telemosaic:extender_one',''}
+    }
+})
+minetest.register_craft({
+    output = 'telemosaic:extender_three',
+    recipe = {
+        {'', 'telemosaic:extender_two',''},
+        {'telemosaic:extender_two','default:obsidian','telemosaic:extender_two'},
+        {'', 'telemosaic:extender_two',''}
+    }
+})
+
 minetest.register_on_joinplayer(function(player)
     local name = player:get_player_name()
     if not M.players[name] then
