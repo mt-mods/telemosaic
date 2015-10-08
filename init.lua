@@ -96,7 +96,7 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
         local posstring = itemstack:get_metadata()
         local thispos = hash_pos(pointed_thing.under)
         --print("Key with metadata " .. posstring)
-        if posstring ~= thispos then
+        if posstring ~= thispos and not minetest.is_protected(pointed_thing.under, player:get_player_name()) then
             local dest_pos = unhash_pos(posstring)
             local extended = count_extenders(pointed_thing.under)
             if vector.distance(dest_pos, pointed_thing.under) <= C.beacon_range + extended then
