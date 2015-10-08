@@ -298,6 +298,12 @@ minetest.register_craft({
         {'', 'telemosaic:extender_two',''}
     }
 })
+-- how to recycle a key
+minetest.register_craft({
+    type = 'shapeless',
+    recipe = {'telemosaic:key'},
+    output = 'default:mese_crystal_fragment'
+})
 
 minetest.register_on_joinplayer(function(player)
     local name = player:get_player_name()
