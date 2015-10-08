@@ -3,7 +3,7 @@ Telemosaic [telemosaic]
 
 A Minetest mod for user-generated teleportation pads.
 
-Version: 0.3.1
+Version: 0.4.0
 
 License:
   Code: LGPL 2.1 (see included LICENSE file)
@@ -27,13 +27,15 @@ form a pretty pattern; hence the name "telemosaic".
 Current behavior
 ----------------
 
-Beacons can be found in the creative inventory. Right-clicking a
-beacon with a default mese crystal fragment remembers the position
-in the fragment, which turns into a telemosaic key. Right-clicking
-a second beacon with the key sets up a teleportation route
-from the second beacon to the first beacon. To set up a return
-path, right-click the second beacon with the fragment, and the
-first beacon with the resulting key again.
+Beacons are created with 2 diamonds, 3 obsidian blocks, and a wooden
+door: first row diamond, door, diamond; second row the obsidian blocks.
+
+Right-clicking a beacon with a default mese crystal fragment remembers
+the position in the fragment, which turns into a telemosaic key.
+Right-clicking a second beacon with the key sets up a teleportation
+route from the second beacon to the first beacon. To set up a return
+path, right-click the second beacon with the fragment, and the first
+beacon with the resulting key again.
 
 The beacons do not need to be strictly paired this way: rings or
 star-shaped networks are also possible. Each beacon has only a
@@ -49,18 +51,22 @@ Extenders come in three tiers: tier 1 extends all affected beacons
 by 5 nodes, tier 2 by 20 nodes, and tier 3 by 80 nodes. Placing
 or digging extenders will update affected beacons.
 
+Tier 1 extenders are crafted by placing an obsidian block, a wooden
+door, and another obsidian block in a horizontal row. Tier 2 extenders
+are crafted with an obsidian block in the middle, surrounded by a cross
+of four tier 1 extenders. Tier 3 extenders are crafted with an obsidian
+block surrounded by four tier 2 extenders.
+
 Future plans
 ------------
 
-* Crafting recipes for beacons and extenders
-* Protection for beacon destinations
 * Particle and sound effects
-* Several tiers of extenders
 * Dyeing extenders
 
 Dependencies
 ------------
 * default
+* doors
 
 Installation
 ------------
