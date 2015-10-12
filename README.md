@@ -62,6 +62,7 @@ Future plans
 
 * Particle and sound effects
 * Dyeing extenders
+* Protected beacons (will not teleport if protected)
 
 Dependencies
 ------------
