@@ -3,7 +3,7 @@ Telemosaic [telemosaic]
 
 A Minetest mod for user-generated teleportation pads.
 
-Version: 0.4.0
+Version: 0.4.1
 
 License:
   Code: LGPL 2.1 (see included LICENSE file)
@@ -41,6 +41,12 @@ The beacons do not need to be strictly paired this way: rings or
 star-shaped networks are also possible. Each beacon has only a
 single destination, but can itself be the destination of several
 others.
+
+Beacons will check that their destination is sane: the destination
+still needs to be a beacon, and the two nodes above it should be
+clear for walking / standing in. If your Minetest version supports
+it, the beacon will emerge the area prior to checking and teleporting.
+Emerging is merely a convenience, though.
 
 Beacons have a maximum range of 20 nodes. If the destination is
 too far away, the beacon will turn red and will not function.
