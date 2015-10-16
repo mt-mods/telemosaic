@@ -30,6 +30,8 @@ USA
 telemosaic = {
     -- configuration
     config = {
+        -- keep emerge_delay lower than teleport_delay!
+        emerge_delay = 0.5, -- seconds
         teleport_delay = 2.0, -- seconds
         beacon_range = 20.0, -- max teleport distance
         extender_ranges = {
@@ -46,6 +48,7 @@ telemosaic = {
             last_pos = '-10:5:3',
             time_in_pos = 0.0,
             allow_teleport = true,
+            started_emerge = false,
         }
         ]]
     },
@@ -344,6 +347,7 @@ minetest.register_on_joinplayer(function(player)
             last_pos = pos_hash,
             time_in_pos = 0.0,
             allow_teleport = false, -- no teleport after join
+            started_emerge = false, -- had not emerged destination yet
         }
     end
 end)
@@ -363,8 +367,24 @@ minetest.register_globalstep(function(dtime)
             pl.last_pos = pos_hash
             pl.time_in_pos = 0.0
             pl.allow_teleport = true
+            pl.started_emerge = false
         elseif pl.allow_teleport and stand_node.name == 'telemosaic:beacon' then
             pl.time_in_pos = pl.time_in_pos + dtime
+
+            if pl.time_in_pos > C.emerge_delay and not pl.started_emerge then
+                pl.started_emerge = true
+                if minetest.emerge_area then
+                    local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
+                    if dest_hash ~= nil and dest_hash ~= '' then
+                        local dest = unhash_pos(dest_hash)
+                        local pos_top = { x = dest.x, y = dest.y - 2, z = dest.z }
+                        -- try to emerge the area
+                        --print("Emerging " .. hash_pos(dest) .. " to " .. hash_pos(pos_top))
+                        minetest.emerge_area(dest, pos_top)
+                    end
+                end
+            end
+
             if pl.time_in_pos > C.teleport_delay then
                 local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
                 if dest_hash ~= nil and dest_hash ~= '' then
