@@ -170,6 +170,36 @@ local function extender_dig(digpos, oldnode, oldmetadata, digger)
     end
 end
 
+local function check_teleport_dest(dest)
+    -- check the destination node for beacons, and the two nodes
+    -- above for "walkthrough"
+    -- "ignore" is ok, we could not emerge in time then.
+    local dest_bot = minetest.get_node({ x = dest.x, y = dest.y  , z = dest.z })
+    local dest_mid = minetest.get_node({ x = dest.x, y = dest.y+1, z = dest.z })
+    local dest_top = minetest.get_node({ x = dest.x, y = dest.y+2, z = dest.z })
+    --print ("Looking at " .. dest_bot.name .. ", " .. dest_mid.name .. ", " .. dest_top.name)
+    local dest_ok  = true
+    if dest_bot.name ~= 'ignore' and not string.match(dest_bot.name, '^telemosaic:beacon') then
+        dest_ok = false
+        --print("Bottom is not beacon")
+    end
+    if dest_mid.name ~= 'ignore' and dest_mid.name ~= 'air' then
+        local def = minetest.registered_nodes[dest_mid.name]
+        if def and def.walkable then
+            dest_ok = false
+            --print("Mid is walkable")
+        end
+    end
+    if dest_top.name ~= 'ignore' and dest_top.name ~= 'air' then
+        local def = minetest.registered_nodes[dest_top.name]
+        if def and def.walkable then
+            dest_ok = false
+            --print("Top is walkable")
+        end
+    end
+    return dest_ok
+end
+
 minetest.register_node('telemosaic:beacon_off', {
     description = 'Telemosaic beacon',
     tiles = {
@@ -338,20 +368,29 @@ minetest.register_globalstep(function(dtime)
             if pl.time_in_pos > C.teleport_delay then
                 local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
                 if dest_hash ~= nil and dest_hash ~= '' then
-                    --print("Ping to " .. dest_hash)
                     local dest = unhash_pos(dest_hash)
-                    dest.y = dest.y + 0.5
+
+                    -- test destination nodes
+                    local dest_ok = check_teleport_dest(dest)
+
+                    --print("Ping to " .. dest_hash)
                     local extended = count_extenders(pos)
                     -- check for range before teleport (with leeway)
                     local dist = vector.distance(pos, dest)
                     --print("Dist :" .. (dist-0.5) .. " to " .. (C.beacon_range + extended))
-                    if dist - 0.5 <= C.beacon_range + extended then
+
+                    if dest_ok and dist - 0.5 <= C.beacon_range + extended then
+                        dest.y = dest.y + 0.5
                         player:setpos(dest)
                         pl.last_pos = hash_pos(dest)
+                    else
+                        -- beacon is in error, one way or another.
+                        -- but don't swap it out - we won't get it back otherwise!
                     end
                     pl.allow_teleport = false -- need to move first, regardless
                 end
             end
+
         end
     end
 end)
