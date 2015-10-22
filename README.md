@@ -3,7 +3,7 @@ Telemosaic [telemosaic]
 
 A Minetest mod for user-generated teleportation pads.
 
-Version: 0.4.1
+Version: 0.5.0
 
 License:
   Code: LGPL 2.1 (see included LICENSE file)
@@ -63,17 +63,21 @@ are crafted with an obsidian block in the middle, surrounded by a cross
 of four tier 1 extenders. Tier 3 extenders are crafted with an obsidian
 block surrounded by four tier 2 extenders.
 
+Extenders can be colored with any of the dyes found in the dye mod.
+Colored extenders work just like regular extenders, both for
+teleporting and for recipes. To "uncolor" an extender, dye it grey.
+
 Future plans
 ------------
 
 * Particle and sound effects
-* Dyeing extenders
 * Protected beacons (will not teleport if protected)
 
 Dependencies
 ------------
 * default
 * doors
+* dye (optional)
 
 Installation
 ------------
