@@ -36,6 +36,7 @@ telemosaic = {
         beacon_range = 20.0, -- max teleport distance
         extender_ranges = {
             -- note: not adding beacons here, since they don't extend
+            -- also: base name of colored versions
             ['telemosaic:extender_one'] = 5.0,
             ['telemosaic:extender_two'] = 20.0,
             ['telemosaic:extender_three'] = 80.0,
@@ -77,7 +78,10 @@ local function count_extenders(pos)
     for z=-3,3 do
         for x=-3,3 do
             local node = minetest.get_node({ x=pos.x+x, y=pos.y, z=pos.z+z})
-            extended = extended + ( C.extender_ranges[node.name] or 0.0 )
+            local name = node.name
+            -- trim color off the back
+            name = string.gsub(name, '^(telemosaic:extender_%a+)_%a+', '%1')
+            extended = extended + ( C.extender_ranges[name] or 0.0 )
         end
     end
     --print("Total extended: " .. extended)
@@ -271,36 +275,60 @@ minetest.register_tool('telemosaic:key', {
     groups = { not_in_creative_inventory = 1 },
 })
 
-minetest.register_node('telemosaic:extender_one', {
-    description = 'Telemosaic extender, tier 1',
-    tiles = {
-        'telemosaic_extender_one.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2 },
-    after_place_node = extender_place,
-    after_dig_node   = extender_dig,
-})
-minetest.register_node('telemosaic:extender_two', {
-    description = 'Telemosaic extender, tier 2',
-    tiles = {
-        'telemosaic_extender_two.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2 },
-    after_place_node = extender_place,
-    after_dig_node   = extender_dig,
-})
-minetest.register_node('telemosaic:extender_three', {
-    description = 'Telemosaic extender, tier 3',
-    tiles = {
-        'telemosaic_extender_three.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2 },
-    after_place_node = extender_place,
-    after_dig_node   = extender_dig,
-})
+-- extenders come in three strengths, and many colors
+
+local strengths = {
+    -- index starts at 1
+    'one',
+    'two',
+    'three',
+}
+local colors = {
+    -- TODO: localisation
+    -- default: { name= 'grey', value= '#ffffff00'},
+    { name= 'white', value= '#ffffff80'},
+    { name= 'dark_grey', value= '#000000c0'},
+    { name= 'black', value= '#00000080'},
+    { name= 'violet', value= '#40008080'},
+    { name= 'blue', value= '#0000ff80'},
+    { name= 'cyan', value= '#00ffff80'},
+    { name= 'dark_green', value= '#00800080'},
+    { name= 'green', value= '#00ff0080'},
+    { name= 'yellow', value= '#ffff0080'},
+    { name= 'brown', value= '#80400080'},
+    { name= 'orange', value= '#ff800080'},
+    { name= 'red', value= '#ff000080'},
+    { name= 'magenta', value= '#ff00ff80'},
+    { name= 'pink', value= '#ff808080'},
+}
+
+for num, strength in ipairs(strengths) do
+    minetest.register_node(string.format('telemosaic:extender_%s', strength), {
+        description = string.format('Telemosaic extender, tier %d', num),
+        tiles = {
+            string.format('telemosaic_extender_%s.png', strength)
+        },
+        paramtype = 'light',
+        groups = { cracky = 2, [string.format('telemosaic_extender_%s', strength)] = 1 },
+        after_place_node = extender_place,
+        after_dig_node   = extender_dig,
+    })
+    -- colored versions, not in creative inventory, if dyes available
+    if minetest.get_modpath('dye') then
+        for _,c in ipairs(colors) do
+            minetest.register_node(string.format('telemosaic:extender_%s_%s', strength, c.name), {
+                description = string.format('Telemosaic extender, tier %d (%s)', num, c.name),
+                tiles = {
+                    string.format('telemosaic_extender_%s.png^[colorize:%s', strength, c.value),
+                },
+                paramtype = 'light',
+                groups = { cracky = 2, [string.format('telemosaic_extender_%s', strength)] = 1, not_in_creative_inventory = 1 },
+                after_place_node = extender_place,
+                after_dig_node   = extender_dig,
+            })
+        end
+    end
+end
 
 minetest.register_craft({
     output = 'telemosaic:beacon_off',
@@ -318,19 +346,40 @@ minetest.register_craft({
 minetest.register_craft({
     output = 'telemosaic:extender_two',
     recipe = {
-        {'', 'telemosaic:extender_one',''},
-        {'telemosaic:extender_one','default:obsidian','telemosaic:extender_one'},
-        {'', 'telemosaic:extender_one',''}
+        {'', 'group:telemosaic_extender_one',''},
+        {'group:telemosaic_extender_one','default:obsidian','group:telemosaic_extender_one'},
+        {'', 'group:telemosaic_extender_one',''}
     }
 })
 minetest.register_craft({
     output = 'telemosaic:extender_three',
     recipe = {
-        {'', 'telemosaic:extender_two',''},
-        {'telemosaic:extender_two','default:obsidian','telemosaic:extender_two'},
-        {'', 'telemosaic:extender_two',''}
+        {'', 'group:telemosaic_extender_two',''},
+        {'group:telemosaic_extender_two','default:obsidian','group:telemosaic_extender_two'},
+        {'', 'group:telemosaic_extender_two',''}
     }
 })
+
+-- coloring recipes
+if minetest.get_modpath('dye') then
+    for num, strength in ipairs(strengths) do
+        -- uncolor
+        minetest.register_craft({
+            type = "shapeless",
+            output = string.format('telemosaic:extender_%s', strength),
+            recipe = { string.format('group:telemosaic_extender_%s', strength), 'dye:grey' },
+        })
+        -- color with dye
+        for _,c in ipairs(colors) do
+            minetest.register_craft({
+                type = "shapeless",
+                output = string.format('telemosaic:extender_%s_%s', strength, c.name),
+                recipe = { string.format('group:telemosaic_extender_%s', strength), string.format('dye:%s', c.name) },
+            })
+        end
+    end
+end
+
 -- how to recycle a key
 minetest.register_craft({
     type = 'shapeless',
