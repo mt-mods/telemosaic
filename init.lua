@@ -147,6 +147,9 @@ local function extender_place(placepos, placer, itemstack, pointed_thing)
                     if dist <= C.beacon_range + extended then
                         -- upgrade :-)
                         minetest.swap_node(pos, { name = "telemosaic:beacon" })
+                    else
+                        local count = math.ceil(dist - (C.beacon_range + extended))
+                        minetest.chat_send_player(placer:get_player_name(), "You still need to add extensions for "..count.." nodes" )
                     end
                 end
             end
