@@ -453,7 +453,41 @@ minetest.register_globalstep(function(dtime)
 
                     if dest_ok and dist - 0.5 <= C.beacon_range + extended then
                         dest.y = dest.y + 0.5
-                        player:setpos(dest)
+                				minetest.sound_play( {name="telemosaic_set", gain=1}, {pos=pos, max_hear_distance=30})
+                      	minetest.add_particlespawner({
+                      		amount = 100,
+                      		time = 0.25,
+                      		minpos = {x=pos.x, y=pos.y+0.3, z=pos.z},
+                      		maxpos = {x=pos.x, y=pos.y+2, z=pos.z},
+                      		minvel = {x = 1,  y = -6,  z = 1},
+                      		maxvel = {x = -1, y = -1, z = -1},
+                      		minacc = {x = 0, y = -2, z = 0},
+                      		maxacc = {x = 0, y = -6, z = 0},
+                      		minexptime = 0.1,
+                      		maxexptime = 1,
+                      		minsize = 0.5,
+                      		maxsize = 1.5,
+                      		texture = "telemosaic_particle_departure.png",
+                      		glow = 15,
+                      })
+                      player:setpos(dest)
+                				minetest.sound_play( {name="telemosaic_teleport", gain=1}, {pos=dest, max_hear_distance=30})
+                      	minetest.add_particlespawner({
+                      		amount = 100,
+                      		time = 0.25,
+                      		minpos = {x=dest.x, y=dest.y+0.3, z=dest.z},
+                      		maxpos = {x=dest.x, y=dest.y+2, z=dest.z},
+                      		minvel = {x = -1, y = 1, z = -1},
+                      		maxvel = {x = 1,  y = 6,  z = 1},
+                      		minacc = {x = 0, y = -2, z = 0},
+                      		maxacc = {x = 0, y = -6, z = 0},
+                      		minexptime = 0.1,
+                      		maxexptime = 1,
+                      		minsize = 0.5,
+                      		maxsize = 1.5,
+                      		texture = "telemosaic_particle_arrival.png",
+                      		glow = 15,
+                      })
                         pl.last_pos = hash_pos(dest)
                     else
                         -- beacon is in error, one way or another.
