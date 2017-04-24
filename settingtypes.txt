@@ -1,0 +1,14 @@
+#The range of the teleport beacon
+telemosaic_beacon_range (Beacon range) string 20.0
+
+#The range of the tier one extender
+telemosaic_extender_one_range (Extender tier one range) string 5.0
+
+#The range of the tier two extender
+telemosaic_extender_two_range (Extender tier two range) string 20.0
+
+#The range of the tier three extender
+telemosaic_extender_three_range (Extender tier three range) string 80.0
+
+#The delay before player is teleported
+telemosaic_teleport_delay (Teleport delay) string 2.0
