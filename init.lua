@@ -32,14 +32,14 @@ telemosaic = {
     config = {
         -- keep emerge_delay lower than teleport_delay!
         emerge_delay = 0.5, -- seconds
-        teleport_delay = 2.0, -- seconds
-        beacon_range = 20.0, -- max teleport distance
+        teleport_delay = tonumber(minetest.setting_get("telemosaic_teleport_delay")) or 2.0, -- seconds
+        beacon_range = tonumber(minetest.setting_get("telemosaic_beacon_range")) or 20.0, -- max teleport distance
         extender_ranges = {
             -- note: not adding beacons here, since they don't extend
             -- also: base name of colored versions
-            ['telemosaic:extender_one'] = 5.0,
-            ['telemosaic:extender_two'] = 20.0,
-            ['telemosaic:extender_three'] = 80.0,
+            ['telemosaic:extender_one'] = tonumber(minetest.setting_get("telemosaic_extender_one_range")) or 5.0,
+            ['telemosaic:extender_two'] = tonumber(minetest.setting_get("telemosaic_extender_two_range")) or 20.0,
+            ['telemosaic:extender_three'] = tonumber(minetest.setting_get("telemosaic_extender_three_range")) or 80.0,
         },
     },
 
