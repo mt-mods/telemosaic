@@ -88,6 +88,35 @@ local function count_extenders(pos)
     return extended
 end
 
+-- returns true if the beacon is in an error state (protected or not)
+local function is_err_beacon(pos)
+	local node = minetest.get_node(pos)
+	if not node then
+		-- no node or name
+		return false
+	end
+	return node.name == "telemosaic:beacon_err" or node.name == "telemosaic:beacon_err_protected"
+end
+
+-- swaps out the beacon with the new state suffix
+local function swap_beacon(pos, new_state_suffix)
+	local node = minetest.get_node(pos)
+	if not node then
+		-- no node at pos
+		return
+	end
+
+	local name = node.name
+	local new_node_name = "telemosaic:beacon" .. new_state_suffix
+
+	if string.match(name, "_protected") then
+		-- protected beacon
+		new_node_name = new_node_name .. "_protected"
+	end
+
+	minetest.swap_node(pos, { name = new_node_name })
+end
+
 local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
     local name = itemstack:get_name()
     --print("Clicked by a " ..name)
@@ -107,9 +136,9 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
             local dest_pos = unhash_pos(posstring)
             local extended = count_extenders(pointed_thing.under)
             if vector.distance(dest_pos, pointed_thing.under) <= C.beacon_range + extended then
-                minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon" })
+		swap_beacon(pointed_thing.under, "")
             else
-                minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon_err" })
+		swap_beacon(pointed_thing.under, "_err")
             end
 
             -- set the destination anyway, it just won't work as
@@ -136,20 +165,23 @@ local function extender_place(placepos, placer, itemstack, pointed_thing)
     for z=-3,3 do
         for x=-3,3 do
             local pos = { x=placepos.x+x, y=placepos.y, z=placepos.z+z }
-            local node = minetest.get_node(pos)
-            if node ~= nil and node.name == 'telemosaic:beacon_err' then
+            if is_err_beacon(pos) then
                 -- candidate!
                 local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
+
                 if dest_hash ~= nil and dest_hash ~= '' then
                     local dest = unhash_pos(dest_hash)
                     local extended = count_extenders(pos)
                     local dist = vector.distance(pos, dest)
+
                     if dist <= C.beacon_range + extended then
                         -- upgrade :-)
-                        minetest.swap_node(pos, { name = "telemosaic:beacon" })
+			swap_beacon(pos, "")
+
                     else
                         local count = math.ceil(dist - (C.beacon_range + extended))
                         minetest.chat_send_player(placer:get_player_name(), "You still need to add extensions for "..count.." nodes" )
+
                     end
                 end
             end
@@ -170,9 +202,10 @@ local function extender_dig(digpos, oldnode, oldmetadata, digger)
                     local dest = unhash_pos(dest_hash)
                     local extended = count_extenders(pos)
                     local dist = vector.distance(pos, dest)
+
                     if dist > C.beacon_range + extended then
                         -- downgrade :-(
-                        minetest.swap_node(pos, { name = "telemosaic:beacon_err" })
+			swap_beacon(pos, "_err")
                     end
                 end
             end
@@ -422,7 +455,8 @@ minetest.register_globalstep(function(dtime)
             pl.time_in_pos = 0.0
             pl.allow_teleport = true
             pl.started_emerge = false
-        elseif pl.allow_teleport and stand_node.name == 'telemosaic:beacon' then
+
+        elseif pl.allow_teleport and (stand_node.name == 'telemosaic:beacon' or stand_node.name == 'telemosaic:beacon_protected') then
             pl.time_in_pos = pl.time_in_pos + dtime
 
             if pl.time_in_pos > C.emerge_delay and not pl.started_emerge then
