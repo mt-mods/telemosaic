@@ -375,6 +375,13 @@ minetest.register_craft({
         {'default:obsidian','default:obsidian','default:obsidian'}
     }
 })
+
+minetest.register_craft({
+    output = 'telemosaic:beacon_off_protected',
+    type = 'shapeless',
+    recipe = {"telemosaic:beacon_off", "default:steel_ingot"}
+})
+
 minetest.register_craft({
     output = 'telemosaic:extender_one',
     recipe = {
