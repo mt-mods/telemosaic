@@ -457,6 +457,15 @@ minetest.register_globalstep(function(dtime)
             pl.started_emerge = false
 
         elseif pl.allow_teleport and (stand_node.name == 'telemosaic:beacon' or stand_node.name == 'telemosaic:beacon_protected') then
+            if stand_node.name == 'telemosaic:beacon_protected' then
+		-- check protection on protected telemosaic
+		if minetest.is_protected(pos, name) then
+			-- protected telemosaic, reset moved-flag and abort
+			pl.allow_teleport = false
+			pl.last_pos = pos_hash
+			return
+		end
+            end
             pl.time_in_pos = pl.time_in_pos + dtime
 
             if pl.time_in_pos > C.emerge_delay and not pl.started_emerge then
