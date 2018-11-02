@@ -210,51 +210,67 @@ local function check_teleport_dest(dest)
     return dest_ok
 end
 
-minetest.register_node('telemosaic:beacon', {
-    description = 'Telemosaic beacon (on)',
-    tiles = {
-        'telemosaic_beacon_top.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2, not_in_creative_inventory = 1 },
-    drop = 'telemosaic:beacon_off',
-    on_rightclick = beacon_rightclick,
-})
-minetest.register_node('telemosaic:beacon_err', {
-    description = 'Telemosaic beacon (err)',
-    tiles = {
-        'telemosaic_beacon_err.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2, not_in_creative_inventory = 1 },
-    drop = 'telemosaic:beacon_off',
-    on_rightclick = beacon_rightclick,
-})
+-- register protected and plain beacons with different suffixes, names and textures
+for _,is_protected in pairs({ true, false }) do
 
-minetest.register_node('telemosaic:beacon_off', {
-    description = 'Telemosaic beacon',
-    tiles = {
-        'telemosaic_beacon_off.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2 },
-    on_rightclick = beacon_rightclick,
-})
+	local node_name_suffix = ""
+	local texture_overlay = ""
+	local description_prefix = ""
+
+	if is_protected then
+		node_name_suffix = "_protected"
+		texture_overlay = "^telemosaic_beacon_protected_overlay.png"
+		description_prefix = "Protected "
+	end
+
+	minetest.register_node('telemosaic:beacon' .. node_name_suffix, {
+	    description = description_prefix .. 'Telemosaic beacon (on)',
+	    tiles = {
+		'telemosaic_beacon_top.png' .. texture_overlay,
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+	    },
+	    paramtype = 'light',
+	    groups = { cracky = 2, not_in_creative_inventory = 1 },
+	    drop = 'telemosaic:beacon_off',
+	    on_rightclick = beacon_rightclick,
+	})
+
+	minetest.register_node('telemosaic:beacon_err' .. node_name_suffix, {
+	    description = description_prefix .. 'Telemosaic beacon (err)',
+	    tiles = {
+		'telemosaic_beacon_err.png' .. texture_overlay,
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+	    },
+	    paramtype = 'light',
+	    groups = { cracky = 2, not_in_creative_inventory = 1 },
+	    drop = 'telemosaic:beacon_off',
+	    on_rightclick = beacon_rightclick,
+	})
+
+	minetest.register_node('telemosaic:beacon_off' .. node_name_suffix, {
+	    description = description_prefix .. 'Telemosaic beacon',
+	    tiles = {
+		'telemosaic_beacon_off.png' .. texture_overlay,
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+	    },
+	    paramtype = 'light',
+	    groups = { cracky = 2 },
+	    on_rightclick = beacon_rightclick,
+	})
+
+end
 
 
 minetest.register_tool('telemosaic:key', {
