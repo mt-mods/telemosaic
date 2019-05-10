@@ -210,20 +210,6 @@ local function check_teleport_dest(dest)
     return dest_ok
 end
 
-minetest.register_node('telemosaic:beacon_off', {
-    description = 'Telemosaic beacon',
-    tiles = {
-        'telemosaic_beacon_off.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2 },
-    on_rightclick = beacon_rightclick,
-})
 minetest.register_node('telemosaic:beacon', {
     description = 'Telemosaic beacon (on)',
     tiles = {
