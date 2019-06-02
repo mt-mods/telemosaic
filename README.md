@@ -8,6 +8,7 @@ Version: 0.5.0
 License:
   Code: LGPL 2.1 (see included LICENSE file)
   Textures: CC-BY-SA (see http://creativecommons.org/licenses/by-sa/4.0/)
+  textures/telemosaic_beacon_protected_overlay.png MIT (https://notabug.org/TenPlus1/protector)
 
 Report bugs or request help on the forum topic.
 

@@ -88,6 +88,35 @@ local function count_extenders(pos)
     return extended
 end
 
+-- returns true if the beacon is in an error state (protected or not)
+local function is_err_beacon(pos)
+	local node = minetest.get_node(pos)
+	if not node then
+		-- no node or name
+		return false
+	end
+	return node.name == "telemosaic:beacon_err" or node.name == "telemosaic:beacon_err_protected"
+end
+
+-- swaps out the beacon with the new state suffix
+local function swap_beacon(pos, new_state_suffix)
+	local node = minetest.get_node(pos)
+	if not node then
+		-- no node at pos
+		return
+	end
+
+	local name = node.name
+	local new_node_name = "telemosaic:beacon" .. new_state_suffix
+
+	if string.match(name, "_protected") then
+		-- protected beacon
+		new_node_name = new_node_name .. "_protected"
+	end
+
+	minetest.swap_node(pos, { name = new_node_name })
+end
+
 local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
     local name = itemstack:get_name()
     --print("Clicked by a " ..name)
@@ -107,9 +136,9 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
             local dest_pos = unhash_pos(posstring)
             local extended = count_extenders(pointed_thing.under)
             if vector.distance(dest_pos, pointed_thing.under) <= C.beacon_range + extended then
-                minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon" })
+		swap_beacon(pointed_thing.under, "")
             else
-                minetest.swap_node(pointed_thing.under, { name = "telemosaic:beacon_err" })
+		swap_beacon(pointed_thing.under, "_err")
             end
 
             -- set the destination anyway, it just won't work as
@@ -136,20 +165,23 @@ local function extender_place(placepos, placer, itemstack, pointed_thing)
     for z=-3,3 do
         for x=-3,3 do
             local pos = { x=placepos.x+x, y=placepos.y, z=placepos.z+z }
-            local node = minetest.get_node(pos)
-            if node ~= nil and node.name == 'telemosaic:beacon_err' then
+            if is_err_beacon(pos) then
                 -- candidate!
                 local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
+
                 if dest_hash ~= nil and dest_hash ~= '' then
                     local dest = unhash_pos(dest_hash)
                     local extended = count_extenders(pos)
                     local dist = vector.distance(pos, dest)
+
                     if dist <= C.beacon_range + extended then
                         -- upgrade :-)
-                        minetest.swap_node(pos, { name = "telemosaic:beacon" })
+			swap_beacon(pos, "")
+
                     else
                         local count = math.ceil(dist - (C.beacon_range + extended))
                         minetest.chat_send_player(placer:get_player_name(), "You still need to add extensions for "..count.." nodes" )
+
                     end
                 end
             end
@@ -170,9 +202,10 @@ local function extender_dig(digpos, oldnode, oldmetadata, digger)
                     local dest = unhash_pos(dest_hash)
                     local extended = count_extenders(pos)
                     local dist = vector.distance(pos, dest)
+
                     if dist > C.beacon_range + extended then
                         -- downgrade :-(
-                        minetest.swap_node(pos, { name = "telemosaic:beacon_err" })
+			swap_beacon(pos, "_err")
                     end
                 end
             end
@@ -210,51 +243,67 @@ local function check_teleport_dest(dest)
     return dest_ok
 end
 
-minetest.register_node('telemosaic:beacon', {
-    description = 'Telemosaic beacon (on)',
-    tiles = {
-        'telemosaic_beacon_top.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2, not_in_creative_inventory = 1 },
-    drop = 'telemosaic:beacon_off',
-    on_rightclick = beacon_rightclick,
-})
-minetest.register_node('telemosaic:beacon_err', {
-    description = 'Telemosaic beacon (err)',
-    tiles = {
-        'telemosaic_beacon_err.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2, not_in_creative_inventory = 1 },
-    drop = 'telemosaic:beacon_off',
-    on_rightclick = beacon_rightclick,
-})
+-- register protected and plain beacons with different suffixes, names and textures
+for _,is_protected in pairs({ true, false }) do
 
-minetest.register_node('telemosaic:beacon_off', {
-    description = 'Telemosaic beacon',
-    tiles = {
-        'telemosaic_beacon_off.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-        'telemosaic_beacon_side.png',
-    },
-    paramtype = 'light',
-    groups = { cracky = 2 },
-    on_rightclick = beacon_rightclick,
-})
+	local node_name_suffix = ""
+	local texture_overlay = ""
+	local description_prefix = ""
+
+	if is_protected then
+		node_name_suffix = "_protected"
+		texture_overlay = "^telemosaic_beacon_protected_overlay.png"
+		description_prefix = "Protected "
+	end
+
+	minetest.register_node('telemosaic:beacon' .. node_name_suffix, {
+	    description = description_prefix .. 'Telemosaic beacon (on)',
+	    tiles = {
+		'telemosaic_beacon_top.png' .. texture_overlay,
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+	    },
+	    paramtype = 'light',
+	    groups = { cracky = 2, not_in_creative_inventory = 1 },
+	    drop = 'telemosaic:beacon_off',
+	    on_rightclick = beacon_rightclick,
+	})
+
+	minetest.register_node('telemosaic:beacon_err' .. node_name_suffix, {
+	    description = description_prefix .. 'Telemosaic beacon (err)',
+	    tiles = {
+		'telemosaic_beacon_err.png' .. texture_overlay,
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+	    },
+	    paramtype = 'light',
+	    groups = { cracky = 2, not_in_creative_inventory = 1 },
+	    drop = 'telemosaic:beacon_off',
+	    on_rightclick = beacon_rightclick,
+	})
+
+	minetest.register_node('telemosaic:beacon_off' .. node_name_suffix, {
+	    description = description_prefix .. 'Telemosaic beacon',
+	    tiles = {
+		'telemosaic_beacon_off.png' .. texture_overlay,
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+	    },
+	    paramtype = 'light',
+	    groups = { cracky = 2 },
+	    on_rightclick = beacon_rightclick,
+	})
+
+end
 
 
 minetest.register_tool('telemosaic:key', {
@@ -326,6 +375,13 @@ minetest.register_craft({
         {'default:obsidian','default:obsidian','default:obsidian'}
     }
 })
+
+minetest.register_craft({
+    output = 'telemosaic:beacon_off_protected',
+    type = 'shapeless',
+    recipe = {"telemosaic:beacon_off", "default:steel_ingot"}
+})
+
 minetest.register_craft({
     output = 'telemosaic:extender_one',
     recipe = {
@@ -406,7 +462,17 @@ minetest.register_globalstep(function(dtime)
             pl.time_in_pos = 0.0
             pl.allow_teleport = true
             pl.started_emerge = false
-        elseif pl.allow_teleport and stand_node.name == 'telemosaic:beacon' then
+
+        elseif pl.allow_teleport and (stand_node.name == 'telemosaic:beacon' or stand_node.name == 'telemosaic:beacon_protected') then
+            if stand_node.name == 'telemosaic:beacon_protected' then
+		-- check protection on protected telemosaic
+		if minetest.is_protected(pos, name) then
+			-- protected telemosaic, reset moved-flag and abort
+			pl.allow_teleport = false
+			pl.last_pos = pos_hash
+			return
+		end
+            end
             pl.time_in_pos = pl.time_in_pos + dtime
 
             if pl.time_in_pos > C.emerge_delay and not pl.started_emerge then
