@@ -432,6 +432,10 @@ minetest.register_craft({
     output = 'default:mese_crystal_fragment'
 })
 
+telemosaic.travel_allowed = function(player, src, dest)
+	return true
+end
+
 minetest.register_on_joinplayer(function(player)
     local name = player:get_player_name()
     if not M.players[name] then
@@ -503,7 +507,7 @@ minetest.register_globalstep(function(dtime)
                     local dist = vector.distance(pos, dest)
                     --print("Dist :" .. (dist-0.5) .. " to " .. (C.beacon_range + extended))
 
-                    if dest_ok and dist - 0.5 <= C.beacon_range + extended then
+                    if dest_ok and dist - 0.5 <= C.beacon_range + extended and telemosaic.travel_allowed(player, pos, dest) then
                         dest.y = dest.y + 0.5
                 				minetest.sound_play( {name="telemosaic_set", gain=1}, {pos=pos, max_hear_distance=30})
                       	minetest.add_particlespawner({
