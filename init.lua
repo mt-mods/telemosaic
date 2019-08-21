@@ -41,6 +41,7 @@ telemosaic = {
             ['telemosaic:extender_two'] = tonumber(minetest.settings:get("telemosaic_extender_two_range")) or 20.0,
             ['telemosaic:extender_three'] = tonumber(minetest.settings:get("telemosaic_extender_three_range")) or 80.0,
         },
+		right_click_teleport = minetest.settings:get_bool("telemosaic_right_click_teleport") or false,
     },
 
     players = {
@@ -152,8 +153,13 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
             })
         end
     else
+		-- teleport when right-clicked
+		if C.right_click_teleport then
+			local pl = M.players[player:get_player_name()]
+			pl.right_clicked = true
+			
         -- normal place-item thing
-        if itemstack:get_definition().type == "node" then
+        elseif itemstack:get_definition().type == "node" then
             return core.item_place_node(itemstack, player, pointed_thing)
         end
     end
@@ -454,6 +460,7 @@ minetest.register_globalstep(function(dtime)
     for _,player in ipairs(minetest.get_connected_players()) do
         local name = player:get_player_name()
         local pl = M.players[name]
+		local do_right_click_teleport = pl.right_clicked
         local pos = player:getpos()
         local pos_hash = hash_pos(pos)
         -- from now on, pos is slightly *under* the player
@@ -466,16 +473,18 @@ minetest.register_globalstep(function(dtime)
             pl.time_in_pos = 0.0
             pl.allow_teleport = true
             pl.started_emerge = false
+			pl.right_clicked = false
 
         elseif pl.allow_teleport and (stand_node.name == 'telemosaic:beacon' or stand_node.name == 'telemosaic:beacon_protected') then
             if stand_node.name == 'telemosaic:beacon_protected' then
-		-- check protection on protected telemosaic
-		if minetest.is_protected(pos, name) then
-			-- protected telemosaic, reset moved-flag and abort
-			pl.allow_teleport = false
-			pl.last_pos = pos_hash
-			return
-		end
+				-- check protection on protected telemosaic
+				if minetest.is_protected(pos, name) then
+					-- protected telemosaic, reset moved-flag and abort
+					pl.allow_teleport = false
+					pl.last_pos = pos_hash
+					pl.right_clicked = false
+					return
+				end
             end
             pl.time_in_pos = pl.time_in_pos + dtime
 
@@ -493,7 +502,12 @@ minetest.register_globalstep(function(dtime)
                 end
             end
 
-            if pl.time_in_pos > C.teleport_delay then
+            if (pl.time_in_pos > C.teleport_delay) and (do_right_click_teleport or not C.right_click_teleport) then
+			
+				-- reset values now to prevent spamming
+				pl.right_clicked = false
+				pl.time_in_pos = 0.0
+				
                 local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
                 if dest_hash ~= nil and dest_hash ~= '' then
                     local dest = unhash_pos(dest_hash)
@@ -549,7 +563,10 @@ minetest.register_globalstep(function(dtime)
                         -- beacon is in error, one way or another.
                         -- but don't swap it out - we won't get it back otherwise!
                     end
-                    pl.allow_teleport = false -- need to move first, regardless
+					
+					if not C.right_click_teleport then -- right-click allows teleporting again without moving
+						pl.allow_teleport = false -- need to move first, regardless
+					end
                 end
             end
 
