@@ -157,6 +157,8 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
 		if C.right_click_teleport then
 			local pl = M.players[player:get_player_name()]
 			pl.right_clicked = true
+			pl.clicked_pos = pointed_thing.under
+			pl.allow_teleport = true
 			
         -- normal place-item thing
         elseif itemstack:get_definition().type == "node" then
@@ -465,8 +467,12 @@ minetest.register_globalstep(function(dtime)
         local pos_hash = hash_pos(pos)
         -- from now on, pos is slightly *under* the player
         pos.y = pos.y - 0.01
-        local stand_node = minetest.get_node(pos)
-        --print ("At position " .. pos_hash .. " standing on a " .. stand_node.name)
+        local node = minetest.get_node(pos)
+        --print ("At position " .. pos_hash .. " standing on a " .. node.name)	
+		if C.right_click_teleport and pl.clicked_pos ~= nil then
+			pos = pl.clicked_pos
+			node = minetest.get_node(pos)
+		end
         if pos_hash ~= pl.last_pos then
             --print("Moved to " .. pos_hash)
             pl.last_pos = pos_hash
@@ -475,8 +481,8 @@ minetest.register_globalstep(function(dtime)
             pl.started_emerge = false
 			pl.right_clicked = false
 
-        elseif pl.allow_teleport and (stand_node.name == 'telemosaic:beacon' or stand_node.name == 'telemosaic:beacon_protected') then
-            if stand_node.name == 'telemosaic:beacon_protected' then
+        elseif pl.allow_teleport and (node.name == 'telemosaic:beacon' or node.name == 'telemosaic:beacon_protected') then
+            if node.name == 'telemosaic:beacon_protected' then
 				-- check protection on protected telemosaic
 				if minetest.is_protected(pos, name) then
 					-- protected telemosaic, reset moved-flag and abort
