@@ -419,7 +419,7 @@ end
 minetest.register_on_joinplayer(function(player)
     local name = player:get_player_name()
     if not M.players[name] then
-        local pos = player:getpos()
+        local pos = player:get_pos()
         local pos_hash = hash_pos(pos)
         M.players[name] = {
             last_pos = pos_hash,
@@ -436,7 +436,7 @@ minetest.register_globalstep(function(dtime)
         local name = player:get_player_name()
         local pl = M.players[name]
 
-        local pos = player:getpos()
+        local pos = player:get_pos()
         local pos_hash = hash_pos(pos)
         -- from now on, pos is slightly *under* the player
         pos.y = pos.y - 0.01
@@ -484,4 +484,3 @@ minetest.register_globalstep(function(dtime)
         end
     end
 end)
-
