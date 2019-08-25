@@ -145,17 +145,27 @@ local function check_teleport_dest(dest)
     return dest_ok
 end
 
+local function is_protected_beacon(pos, player)
+	if minetest.get_node(pos).name == 'telemosaic:beacon_protected' then
+		-- check protection on protected telemosaic
+		if minetest.is_protected(pos, player:get_player_name()) then
+			-- protected telemosaic
+			return true
+		end
+	end
+	-- not a protected telemosaic
+	return false
+end
 
 -- teleports the player with given telemosaic pos
 function do_teleport(pos, player, pl)
 
+	-- reset values now to prevent spamming
+	pl.time_in_pos = 0.0
+		
 	if is_err_beacon(pos) then
 		return
 	end
-
-  if minetest.is_protected(pos, player:get_player_name()) then
-    return
-  end
 
 	local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
 	if dest_hash ~= nil and dest_hash ~= '' then
@@ -254,15 +264,17 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
             })
         end
     else
-	-- teleport when right-clicked
-	if C.right_click_teleport then
-		local pl = M.players[player:get_player_name()]
-		do_teleport(pos, player, pl)
+		-- teleport when right-clicked
+		if C.right_click_teleport then
+			local pl = M.players[player:get_player_name()]
+			if pl.time_since_last_teleport > C.teleport_delay and not is_protected_beacon(pos, player) then
+				do_teleport(pos, player, pl)
+				pl.time_since_last_teleport = 0.0
+			end
 
-        -- normal place-item thing
-        elseif itemstack:get_definition().type == "node" then
-            return core.item_place_node(itemstack, player, pointed_thing)
-
+		-- normal place-item thing
+		elseif itemstack:get_definition().type == "node" then
+			return core.item_place_node(itemstack, player, pointed_thing)
         end
     end
     return itemstack
@@ -428,6 +440,7 @@ minetest.register_on_joinplayer(function(player)
         M.players[name] = {
             last_pos = pos_hash,
             time_in_pos = 0.0,
+			time_since_last_teleport = 0.0,
             allow_teleport = false, -- no teleport after join
             started_emerge = false, -- had not emerged destination yet
         }
@@ -445,6 +458,10 @@ minetest.register_globalstep(function(dtime)
         -- from now on, pos is slightly *under* the player
         pos.y = pos.y - 0.01
         local node = minetest.get_node(pos)
+		
+		if pl.time_since_last_teleport <= C.teleport_delay then
+			pl.time_since_last_teleport = pl.time_since_last_teleport + dtime
+		end
 
         if pos_hash ~= pl.last_pos then
             --print("Moved to " .. pos_hash)
@@ -454,16 +471,14 @@ minetest.register_globalstep(function(dtime)
             pl.started_emerge = false
 
         elseif pl.allow_teleport and (node.name == 'telemosaic:beacon' or node.name == 'telemosaic:beacon_protected') then
-            if node.name == 'telemosaic:beacon_protected' then
-		-- check protection on protected telemosaic
-		if minetest.is_protected(pos, name) then
-			-- protected telemosaic, reset moved-flag and abort
-			pl.allow_teleport = false
-			pl.last_pos = pos_hash
-			return
-		end
+            if is_protected_beacon(pos, player) then
+				-- protected telemosaic, reset moved-flag and abort
+				pl.allow_teleport = false
+				pl.last_pos = pos_hash
+				return
             end
-            pl.time_in_pos = pl.time_in_pos + dtime
+			
+			pl.time_in_pos = pl.time_in_pos + dtime
 
             if pl.time_in_pos > C.emerge_delay and not pl.started_emerge then
                 pl.started_emerge = true
@@ -480,9 +495,7 @@ minetest.register_globalstep(function(dtime)
             end
 
             if pl.time_in_pos > C.teleport_delay then
-		-- reset values now to prevent spamming
-		pl.time_in_pos = 0.0
-		do_teleport(pos, player, pl)
+				do_teleport(pos, player, pl)
             end
 
         end
