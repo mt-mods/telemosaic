@@ -153,6 +153,10 @@ function do_teleport(pos, player, pl)
 		return
 	end
 
+  if minetest.is_protected(pos, player:get_player_name()) then
+    return
+  end
+
 	local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
 	if dest_hash ~= nil and dest_hash ~= '' then
 	local dest = unhash_pos(dest_hash)
@@ -186,7 +190,7 @@ function do_teleport(pos, player, pl)
 			texture = "telemosaic_particle_departure.png",
 			glow = 15,
 		})
-		player:setpos(dest)
+		player:set_pos(dest)
 
 		minetest.sound_play( {name="telemosaic_teleport", gain=1}, {pos=dest, max_hear_distance=30})
 		minetest.add_particlespawner({
