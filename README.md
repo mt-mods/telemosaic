@@ -68,6 +68,11 @@ Extenders can be colored with any of the dyes found in the dye mod.
 Colored extenders work just like regular extenders, both for
 teleporting and for recipes. To "uncolor" an extender, dye it grey.
 
+Settings
+------------
+
+* `telemosaic_right_click_teleport` allow teleport on rightclick
+
 Future plans
 ------------
 
