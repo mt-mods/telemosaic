@@ -57,8 +57,6 @@ telemosaic = {
 
 }
 
-local modpath = minetest.get_modpath(minetest.get_current_modname())
-
 dofile(modpath.."/teleport.lua")
 dofile(modpath.."/crafts.lua")
 dofile(modpath.."/abm.lua")
