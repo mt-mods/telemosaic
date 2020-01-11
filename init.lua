@@ -41,20 +41,7 @@ telemosaic = {
             ['telemosaic:extender_two'] = tonumber(minetest.settings:get("telemosaic_extender_two_range")) or 20.0,
             ['telemosaic:extender_three'] = tonumber(minetest.settings:get("telemosaic_extender_three_range")) or 80.0,
         },
-		right_click_teleport = minetest.settings:get_bool("telemosaic_right_click_teleport") or false,
     },
-
-    players = {
-        --[[
-        name = {
-            last_pos = '-10:5:3',
-            time_in_pos = 0.0,
-            allow_teleport = true,
-            started_emerge = false,
-        }
-        ]]
-    },
-
 }
 local modpath = minetest.get_modpath(minetest.get_current_modname())
 
