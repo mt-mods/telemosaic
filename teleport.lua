@@ -1,5 +1,7 @@
 local C = telemosaic.config
 
+local recent_teleports = {}
+
 local function hash_pos(pos)
     return math.floor(pos.x + 0.5) .. ':' ..
            math.floor(pos.y + 0.5) .. ':' ..
@@ -104,7 +106,7 @@ local function extender_dig(digpos, oldnode, oldmetadata, digger)
 
                     if dist > C.beacon_range + extended then
                         -- downgrade :-(
-			swap_beacon(pos, "_err")
+						swap_beacon(pos, "_err")
                     end
                 end
             end
@@ -156,6 +158,13 @@ end
 
 -- teleports the player with given telemosaic pos
 function do_teleport(pos, player)
+	
+	-- prevent teleport spamming
+	local player_name = player:get_player_name()
+	if recent_teleports[player_name] then
+		return
+	end
+
 	if is_err_beacon(pos) then
 		return
 	end
@@ -212,6 +221,14 @@ function do_teleport(pos, player)
 			texture = "telemosaic_particle_arrival.png",
 			glow = 15,
 		})
+		
+		-- prevent teleport spamming
+		recent_teleports[player_name] = true
+		minetest.after(1, 
+			function(name)
+				recent_teleports[name] = nil
+			end,
+			player_name)
 		else
 		-- beacon is in error, one way or another.
 		-- but don't swap it out - we won't get it back otherwise!
@@ -254,18 +271,16 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
                 count = 1, wear = 0,
             })
         end
-    elseif is_protected_beacon(pos, player) then
-        return
-    else
-        if player:get_player_control().sneak then
-            if itemstack:get_definition().type == "node" then
-                -- normal place
-                return minetest.item_place_node(itemstack, player, pointed_thing)
-            end
-        else
-            -- teleport when right-clicked
-            do_teleport(pos, player)
-        end
+    elseif player:get_player_control().sneak then
+		-- normal place
+		local def = minetest.registered_nodes[itemstack:get_name()]
+		if def then
+			return def.on_place(itemstack, player, pointed_thing)
+		end
+
+    elseif not is_protected_beacon(pos, player) then
+		-- teleport when right-clicked
+		do_teleport(pos, player)
     end
     return itemstack
 end
