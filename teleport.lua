@@ -1,7 +1,4 @@
-
-
-local M = telemosaic
-local C = M.config
+local C = telemosaic.config
 
 local function hash_pos(pos)
     return math.floor(pos.x + 0.5) .. ':' ..
@@ -158,11 +155,7 @@ local function is_protected_beacon(pos, player)
 end
 
 -- teleports the player with given telemosaic pos
-function do_teleport(pos, player, pl)
-
-	-- reset values now to prevent spamming
-	pl.time_in_pos = 0.0
-		
+function do_teleport(pos, player)
 	if is_err_beacon(pos) then
 		return
 	end
@@ -219,12 +212,10 @@ function do_teleport(pos, player, pl)
 			texture = "telemosaic_particle_arrival.png",
 			glow = 15,
 		})
-		pl.last_pos = hash_pos(dest)
 		else
 		-- beacon is in error, one way or another.
 		-- but don't swap it out - we won't get it back otherwise!
 		end
-		pl.allow_teleport = false -- need to move first, regardless
 	end
 end
 
@@ -263,18 +254,17 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
                 count = 1, wear = 0,
             })
         end
+    elseif is_protected_beacon(pos, player) then
+        return
     else
-		-- teleport when right-clicked
-		if C.right_click_teleport then
-			local pl = M.players[player:get_player_name()]
-			if pl.time_since_last_teleport > C.teleport_delay and not is_protected_beacon(pos, player) then
-				do_teleport(pos, player, pl)
-				pl.time_since_last_teleport = 0.0
-			end
-
-		-- normal place-item thing
-		elseif itemstack:get_definition().type == "node" then
-			return core.item_place_node(itemstack, player, pointed_thing)
+        if player:get_player_control().sneak then
+            if itemstack:get_definition().type == "node" then
+                -- normal place
+                return minetest.item_place_node(itemstack, player, pointed_thing)
+            end
+        else
+            -- teleport when right-clicked
+            do_teleport(pos, player)
         end
     end
     return itemstack
@@ -431,73 +421,3 @@ end
 telemosaic.travel_allowed = function(player, src, dest)
 	return true
 end
-
-minetest.register_on_joinplayer(function(player)
-    local name = player:get_player_name()
-    if not M.players[name] then
-        local pos = player:get_pos()
-        local pos_hash = hash_pos(pos)
-        M.players[name] = {
-            last_pos = pos_hash,
-            time_in_pos = 0.0,
-			time_since_last_teleport = 0.0,
-            allow_teleport = false, -- no teleport after join
-            started_emerge = false, -- had not emerged destination yet
-        }
-    end
-end)
-
-
-minetest.register_globalstep(function(dtime)
-    for _,player in ipairs(minetest.get_connected_players()) do
-        local name = player:get_player_name()
-        local pl = M.players[name]
-
-        local pos = player:get_pos()
-        local pos_hash = hash_pos(pos)
-        -- from now on, pos is slightly *under* the player
-        pos.y = pos.y - 0.01
-        local node = minetest.get_node(pos)
-		
-		if pl.time_since_last_teleport <= C.teleport_delay then
-			pl.time_since_last_teleport = pl.time_since_last_teleport + dtime
-		end
-
-        if pos_hash ~= pl.last_pos then
-            --print("Moved to " .. pos_hash)
-            pl.last_pos = pos_hash
-            pl.time_in_pos = 0.0
-            pl.allow_teleport = true
-            pl.started_emerge = false
-
-        elseif pl.allow_teleport and (node.name == 'telemosaic:beacon' or node.name == 'telemosaic:beacon_protected') then
-            if is_protected_beacon(pos, player) then
-				-- protected telemosaic, reset moved-flag and abort
-				pl.allow_teleport = false
-				pl.last_pos = pos_hash
-				return
-            end
-			
-			pl.time_in_pos = pl.time_in_pos + dtime
-
-            if pl.time_in_pos > C.emerge_delay and not pl.started_emerge then
-                pl.started_emerge = true
-                if minetest.emerge_area then
-                    local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
-                    if dest_hash ~= nil and dest_hash ~= '' then
-                        local dest = unhash_pos(dest_hash)
-                        local pos_top = { x = dest.x, y = dest.y - 2, z = dest.z }
-                        -- try to emerge the area
-                        --print("Emerging " .. hash_pos(dest) .. " to " .. hash_pos(pos_top))
-                        minetest.emerge_area(dest, pos_top)
-                    end
-                end
-            end
-
-            if pl.time_in_pos > C.teleport_delay then
-				do_teleport(pos, player, pl)
-            end
-
-        end
-    end
-end)
