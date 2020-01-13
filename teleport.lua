@@ -368,8 +368,8 @@ local colors = {
     -- TODO: localisation
     -- default: { name= 'grey', value= '#ffffff00'},
     { name= 'white', value= '#ffffff80'},
-    { name= 'dark_grey', value= '#000000c0'},
-    { name= 'black', value= '#00000080'},
+    { name= 'dark_grey', value= '#00000080'},
+    { name= 'black', value= '#000000c0'},
     { name= 'violet', value= '#40008080'},
     { name= 'blue', value= '#0000ff80'},
     { name= 'cyan', value= '#00ffff80'},
