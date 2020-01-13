@@ -23,7 +23,7 @@ local function count_extenders(pos)
             local node = minetest.get_node({ x=pos.x+x, y=pos.y, z=pos.z+z})
             local name = node.name
             -- trim color off the back
-            name = string.gsub(name, '^(telemosaic:extender_%a+)_%a+', '%1')
+            name = string.gsub(name, '^(telemosaic:extender_%a+)_.+', '%1')
             extended = extended + ( C.extender_ranges[name] or 0.0 )
         end
     end
