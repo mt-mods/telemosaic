@@ -274,12 +274,15 @@ local function beacon_rightclick(pos, node, player, itemstack, pointed_thing)
                 count = 1, wear = 0,
             })
         end
-    elseif player:get_player_control().sneak then
+    -- elseif player:get_player_control().sneak then
+    -- NOTE: shift-place commented out due to recursion-issue
+    -- NOTE: https://github.com/pandorabox-io/pandorabox.io/issues/439
+    -- NOTE: workaround: place another node below/behind to build on the beacon
 		-- normal place
-		local def = minetest.registered_nodes[itemstack:get_name()]
-		if def then
-			return def.on_place(itemstack, player, pointed_thing)
-		end
+		-- local def = minetest.registered_nodes[itemstack:get_name()]
+		-- if def then
+		--	return def.on_place(itemstack, player, pointed_thing)
+		-- end
 
     elseif not is_protected_beacon(pos, player) then
 		-- teleport when right-clicked
