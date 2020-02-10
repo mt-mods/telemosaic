@@ -81,7 +81,10 @@ local function extender_place(placepos, placer, itemstack, pointed_thing)
 
                     else
                         local count = math.ceil(dist - (C.beacon_range + extended))
-                        minetest.chat_send_player(placer:get_player_name(), "You still need to add extensions for "..count.." nodes" )
+                        minetest.chat_send_player(
+                          placer:get_player_name(),
+                          "You still need to add extensions for "..count.." nodes"
+                        )
 
                     end
                 end
@@ -158,7 +161,7 @@ end
 
 -- teleports the player with given telemosaic pos
 function do_teleport(pos, player)
-	
+
 	-- prevent teleport spamming
 	local player_name = player:get_player_name()
 	if recent_teleports[player_name] then
@@ -221,15 +224,15 @@ function do_teleport(pos, player)
 			texture = "telemosaic_particle_arrival.png",
 			glow = 15,
 		})
-		
+
 		-- prevent teleport spamming
 		recent_teleports[player_name] = true
-		minetest.after(1, 
+		minetest.after(1,
 			function(name)
 				recent_teleports[name] = nil
 			end,
 			player_name)
-		else
+		-- else
 		-- beacon is in error, one way or another.
 		-- but don't swap it out - we won't get it back otherwise!
 		end
@@ -403,7 +406,11 @@ for num, strength in ipairs(strengths) do
                     string.format('telemosaic_extender_%s.png^[colorize:%s', strength, c.value),
                 },
                 paramtype = 'light',
-                groups = { cracky = 2, [string.format('telemosaic_extender_%s', strength)] = 1, not_in_creative_inventory = 1 },
+                groups = {
+                  cracky = 2,
+                  [string.format('telemosaic_extender_%s', strength)] = 1,
+                  not_in_creative_inventory = 1
+                },
                 after_place_node = extender_place,
                 after_dig_node   = extender_dig,
             })
