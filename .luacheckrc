@@ -16,5 +16,6 @@ read_globals = {
 	"dump",
 
 	-- Deps
-	"default"
+	"default",
+	"digilines"
 }

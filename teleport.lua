@@ -248,7 +248,7 @@ function do_teleport(pos, player)
 
 		if telemosaic_digiline_switching ~= nil then
 			local chan = minetest.get_meta(pos):get_string("channel")
-			digiline:receptor_send(pos, digilines.rules.default, chan,
+			digilines.receptor_send(pos, digilines.rules.default, chan,
 				"telemosaic "..player:get_player_name().." "..hash_pos(pos))
 		end
 
