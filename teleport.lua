@@ -41,6 +41,16 @@ local function is_err_beacon(pos)
 	return node.name == "telemosaic:beacon_err" or node.name == "telemosaic:beacon_err_protected"
 end
 
+-- returns true if the beacon is disabled state (protected or not)
+local function is_disabled_beacon(pos)
+	local node = minetest.get_node(pos)
+	if not node then
+		-- no node or name
+		return false
+	end
+	return node.name == "telemosaic:beacon_disabled" or node.name == "telemosaic:beacon_disabled_protected"
+end
+
 -- swaps out the beacon with the new state suffix
 local function swap_beacon(pos, new_state_suffix)
 	local node = minetest.get_node(pos)
@@ -99,7 +109,8 @@ local function extender_dig(digpos, oldnode, oldmetadata, digger)
         for x=-3,3 do
             local pos = { x=digpos.x+x, y=digpos.y, z=digpos.z+z }
             local node = minetest.get_node(pos)
-            if node ~= nil and node.name == 'telemosaic:beacon' then
+            if node ~= nil and (node.name == 'telemosaic:beacon'
+                    or node.name == 'telemosaic:beacon_disabled') then
                 -- candidate!
                 local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
                 if dest_hash ~= nil and dest_hash ~= '' then
@@ -159,6 +170,53 @@ local function is_protected_beacon(pos, player)
 	return false
 end
 
+-- digilines optional support
+local telemosaic_digiline_switching
+local telemosaic_digiline_base
+
+local on_digiline_receive = function(pos, _, channel, msg)
+	local setchan = minetest.get_meta(pos):get_string("channel")
+	if channel ~= setchan then
+		return false
+	end
+	if type(msg) ~= "string" then
+		return false
+	end
+	local cmd = string.split(msg, " ")
+	if cmd[1] == "channel" then
+		if #cmd > 1 then
+			minetest.get_meta(pos):set_string("channel", cmd[2])
+		else
+			minetest.get_meta(pos):set_string("channel", "")
+		end
+		return false
+	end
+	return true
+end
+
+if minetest.get_modpath("digilines") then
+	-- for all states but disabled and active beacons: just accept wiring and channel setting
+	telemosaic_digiline_base = {
+		wire = { use_autoconnect = false }, receptor = {},
+		effector = { action = on_digiline_receive }
+	}
+	-- for active and disabled beacon , also implement state switching
+	telemosaic_digiline_switching = {
+		wire = { use_autoconnect = false }, receptor = {},
+		effector = {
+			action = function(pos, _, channel, msg)
+				if on_digiline_receive(pos, _, channel, msg) then
+					if msg == "enable" then
+						swap_beacon(pos, "")
+					elseif msg == "disable" then
+						swap_beacon(pos, "_disabled")
+					end
+				end
+			end
+		}
+	}
+end
+
 -- teleports the player with given telemosaic pos
 function do_teleport(pos, player)
 
@@ -168,7 +226,7 @@ function do_teleport(pos, player)
 		return
 	end
 
-	if is_err_beacon(pos) then
+	if is_err_beacon(pos) or is_disabled_beacon(pos) then
 		return
 	end
 
@@ -187,6 +245,12 @@ function do_teleport(pos, player)
 
 	if dest_ok and dist - 0.5 <= C.beacon_range + extended and telemosaic.travel_allowed(player, pos, dest) then
 		dest.y = dest.y + 0.5
+
+		if telemosaic_digiline_switching ~= nil then
+			local chan = minetest.get_meta(pos):get_string("channel")
+			digiline:receptor_send(pos, digilines.rules.default, chan,
+				"telemosaic "..player:get_player_name().." "..hash_pos(pos))
+		end
 
 		minetest.sound_play( {name="telemosaic_set", gain=1}, {pos=pos, max_hear_distance=30})
 		minetest.add_particlespawner({
@@ -319,6 +383,7 @@ for _,is_protected in pairs({ true, false }) do
 	    groups = { cracky = 2, not_in_creative_inventory = 1 },
 	    drop = 'telemosaic:beacon_off',
 	    on_rightclick = beacon_rightclick,
+	    digiline = telemosaic_digiline_switching
 	})
 
 	minetest.register_node('telemosaic:beacon_err' .. node_name_suffix, {
@@ -335,6 +400,7 @@ for _,is_protected in pairs({ true, false }) do
 	    groups = { cracky = 2, not_in_creative_inventory = 1 },
 	    drop = 'telemosaic:beacon_off',
 	    on_rightclick = beacon_rightclick,
+	    digiline = telemosaic_digiline_base
 	})
 
 	minetest.register_node('telemosaic:beacon_off' .. node_name_suffix, {
@@ -350,6 +416,24 @@ for _,is_protected in pairs({ true, false }) do
 	    paramtype = 'light',
 	    groups = { cracky = 2 },
 	    on_rightclick = beacon_rightclick,
+	    digiline = telemosaic_digiline_base
+	})
+
+	minetest.register_node('telemosaic:beacon_disabled' .. node_name_suffix, {
+	    description = description_prefix .. 'Telemosaic beacon (disabled)',
+	    tiles = {
+		'telemosaic_beacon_disabled.png' .. texture_overlay,
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+		'telemosaic_beacon_side.png',
+	    },
+	    paramtype = 'light',
+	    groups = { cracky = 2, not_in_creative_inventory = 1 },
+	    drop = 'telemosaic:beacon_off',
+	    on_rightclick = beacon_rightclick,
+	    digiline = telemosaic_digiline_switching
 	})
 
 end
