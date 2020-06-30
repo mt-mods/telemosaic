@@ -185,15 +185,12 @@ local on_digiline_receive = function(pos, _, channel, msg)
 	if type(msg) == "string" then
 		local a = string.split(msg, " ")
 		msg = { cmd = a[1], channel = a[2] }
-	end
-	if type(msg) ~= "table" then
+	elseif type(msg) ~= "table" then
 		return false
 	end
 	if msg.cmd == "setchannel" then
-		if msg.channel ~= nil then
+		if type(msg.channel) == "string" then
 			meta:set_string("channel", msg.channel)
-		else
-			meta:set_string("channel", DEFAULT_CHANNEL)
 		end
 		return false
 	end
@@ -253,15 +250,18 @@ function do_teleport(pos, player)
 	--print("Dist :" .. (dist-0.5) .. " to " .. (C.beacon_range + extended))
 
 	if dest_ok and dist - 0.5 <= C.beacon_range + extended and telemosaic.travel_allowed(player, pos, dest) then
-		dest.y = dest.y + 0.5
 
 		if telemosaic_digiline_switching ~= nil then
 			local chan = meta:contains("channel") and meta:get_string("channel") or DEFAULT_CHANNEL
 			digilines.receptor_send(pos, digilines.rules.default, chan, {
 				player = player:get_player_name(),
-				hashpos = { origin = hash_pos(pos), target = dest_hash }
+				hashpos = { origin = hash_pos(pos), target = dest_hash },
+				origin = pos,
+				target = dest,
 			})
 		end
+
+		dest.y = dest.y + 0.5
 
 		minetest.sound_play( {name="telemosaic_set", gain=1}, {pos=pos, max_hear_distance=30})
 		minetest.add_particlespawner({
