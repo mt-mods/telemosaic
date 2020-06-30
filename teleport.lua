@@ -171,23 +171,26 @@ local function is_protected_beacon(pos, player)
 end
 
 -- digilines optional support
+local DEFAULT_CHANNEL = "telemosaic"
+
 local telemosaic_digiline_switching
 local telemosaic_digiline_base
 
 local on_digiline_receive = function(pos, _, channel, msg)
-	local setchan = minetest.get_meta(pos):get_string("channel")
+	local meta = minetest.get_meta(pos)
+	local setchan = meta:contains("channel") and meta:get_string("channel") or DEFAULT_CHANNEL
 	if channel ~= setchan then
 		return false
 	end
-	if type(msg) ~= "string" then
+	if type(msg) == "string" then
+		local a = string.split(msg, " ")
+		msg = { cmd = a[1], channel = a[2] }
+	elseif type(msg) ~= "table" then
 		return false
 	end
-	local cmd = string.split(msg, " ")
-	if cmd[1] == "channel" then
-		if #cmd > 1 then
-			minetest.get_meta(pos):set_string("channel", cmd[2])
-		else
-			minetest.get_meta(pos):set_string("channel", "")
+	if msg.cmd == "setchannel" then
+		if type(msg.channel) == "string" then
+			meta:set_string("channel", msg.channel)
 		end
 		return false
 	end
@@ -206,9 +209,10 @@ if minetest.get_modpath("digilines") then
 		effector = {
 			action = function(pos, _, channel, msg)
 				if on_digiline_receive(pos, _, channel, msg) then
-					if msg == "enable" then
+					local cmd = (type(msg) == "table") and msg.cmd or msg
+					if cmd == "enable" then
 						swap_beacon(pos, "")
-					elseif msg == "disable" then
+					elseif cmd == "disable" then
 						swap_beacon(pos, "_disabled")
 					end
 				end
@@ -230,7 +234,9 @@ function do_teleport(pos, player)
 		return
 	end
 
-	local dest_hash = minetest.get_meta(pos):get_string('telemosaic:dest')
+	local meta = minetest.get_meta(pos)
+
+	local dest_hash = meta:get_string('telemosaic:dest')
 	if dest_hash ~= nil and dest_hash ~= '' then
 	local dest = unhash_pos(dest_hash)
 
@@ -244,13 +250,18 @@ function do_teleport(pos, player)
 	--print("Dist :" .. (dist-0.5) .. " to " .. (C.beacon_range + extended))
 
 	if dest_ok and dist - 0.5 <= C.beacon_range + extended and telemosaic.travel_allowed(player, pos, dest) then
-		dest.y = dest.y + 0.5
 
 		if telemosaic_digiline_switching ~= nil then
-			local chan = minetest.get_meta(pos):get_string("channel")
-			digilines.receptor_send(pos, digilines.rules.default, chan,
-				"telemosaic "..player:get_player_name().." "..hash_pos(pos))
+			local chan = meta:contains("channel") and meta:get_string("channel") or DEFAULT_CHANNEL
+			digilines.receptor_send(pos, digilines.rules.default, chan, {
+				player = player:get_player_name(),
+				hashpos = { origin = hash_pos(pos), target = dest_hash },
+				origin = pos,
+				target = dest,
+			})
 		end
+
+		dest.y = dest.y + 0.5
 
 		minetest.sound_play( {name="telemosaic_set", gain=1}, {pos=pos, max_hear_distance=30})
 		minetest.add_particlespawner({
@@ -416,6 +427,9 @@ for _,is_protected in pairs({ true, false }) do
 	    paramtype = 'light',
 	    groups = { cracky = 2 },
 	    on_rightclick = beacon_rightclick,
+	    on_construct = function(pos)
+	        minetest.get_meta(pos):set_string("channel", DEFAULT_CHANNEL)
+	    end,
 	    digiline = telemosaic_digiline_base
 	})
 
