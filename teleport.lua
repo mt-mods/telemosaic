@@ -173,9 +173,6 @@ end
 -- digilines optional support
 local DEFAULT_CHANNEL = "telemosaic"
 
-local telemosaic_digiline_switching
-local telemosaic_digiline_base
-
 local on_digiline_receive = function(pos, _, channel, msg)
 	local meta = minetest.get_meta(pos)
 	local setchan = meta:contains("channel") and meta:get_string("channel") or DEFAULT_CHANNEL
@@ -184,11 +181,11 @@ local on_digiline_receive = function(pos, _, channel, msg)
 	end
 	if type(msg) == "string" then
 		local a = string.split(msg, " ")
-		msg = { cmd = a[1], channel = a[2] }
+		msg = { command = a[1], channel = a[2] }
 	elseif type(msg) ~= "table" then
 		return false
 	end
-	if msg.cmd == "setchannel" then
+	if msg.command == "setchannel" then
 		if type(msg.channel) == "string" then
 			meta:set_string("channel", msg.channel)
 		end
@@ -197,29 +194,27 @@ local on_digiline_receive = function(pos, _, channel, msg)
 	return true
 end
 
-if minetest.get_modpath("digilines") then
-	-- for all states but disabled and active beacons: just accept wiring and channel setting
-	telemosaic_digiline_base = {
-		wire = { use_autoconnect = false }, receptor = {},
-		effector = { action = on_digiline_receive }
-	}
-	-- for active and disabled beacon , also implement state switching
-	telemosaic_digiline_switching = {
-		wire = { use_autoconnect = false }, receptor = {},
-		effector = {
-			action = function(pos, _, channel, msg)
-				if on_digiline_receive(pos, _, channel, msg) then
-					local cmd = (type(msg) == "table") and msg.cmd or msg
-					if cmd == "enable" then
-						swap_beacon(pos, "")
-					elseif cmd == "disable" then
-						swap_beacon(pos, "_disabled")
-					end
+-- for all states but disabled and active beacons: just accept wiring and channel setting
+local telemosaic_digiline_base = {
+	receptor = {},
+	effector = { action = on_digiline_receive }
+}
+-- for active and disabled beacon , also implement state switching
+local telemosaic_digiline_switching = {
+	receptor = {},
+	effector = {
+		action = function(pos, _, channel, msg)
+			if on_digiline_receive(pos, _, channel, msg) then
+				local cmd = (type(msg) == "table") and msg.command or msg
+				if cmd == "enable" then
+					swap_beacon(pos, "")
+				elseif cmd == "disable" then
+					swap_beacon(pos, "_disabled")
 				end
 			end
-		}
+		end
 	}
-end
+}
 
 -- teleports the player with given telemosaic pos
 function do_teleport(pos, player)
