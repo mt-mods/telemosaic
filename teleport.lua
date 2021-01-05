@@ -217,7 +217,7 @@ local telemosaic_digiline_switching = {
 }
 
 -- teleports the player with given telemosaic pos
-function do_teleport(pos, player)
+local function do_teleport(pos, player)
 
 	-- prevent teleport spamming
 	local player_name = player:get_player_name()

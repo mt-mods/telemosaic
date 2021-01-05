@@ -1,5 +1,6 @@
-Telemosaic [telemosaic]
-=======================
+# Telemosaic [telemosaic]
+
+[![luacheck](https://github.com/mt-mods/telemosaic/workflows/luacheck/badge.svg)](https://github.com/mt-mods/telemosaic/actions)
 
 A Minetest mod for user-generated teleportation pads.
 
