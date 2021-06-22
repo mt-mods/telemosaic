@@ -1,14 +1,17 @@
-#The range of the teleport beacon
-telemosaic_beacon_range (Beacon range) string 20.0
+#The base range of the teleport beacon
+telemosaic_beacon_range (Beacon range) int 20
 
-#The range of the tier one extender
-telemosaic_extender_one_range (Extender tier one range) string 5.0
+#The extending range of the tier 1 extender
+telemosaic_extender_one_range (Extender tier 1 range) int 5
 
-#The range of the tier two extender
-telemosaic_extender_two_range (Extender tier two range) string 20.0
+#The extending range of the tier 2 extender
+telemosaic_extender_two_range (Extender tier 2 range) int 20
 
-#The range of the tier three extender
-telemosaic_extender_three_range (Extender tier three range) string 80.0
+#The extending range of the tier 3 extender
+telemosaic_extender_three_range (Extender tier 2 range) int 80
 
-#The delay before player is teleported
-telemosaic_teleport_delay (Teleport delay) string 2.0
+#The minimum delay between player teleports
+telemosaic_teleport_delay (Teleport delay) float 1.0
+
+# The default digilines channel for beacons
+telemosaic_default_channel (Default channel) string telemosaic
