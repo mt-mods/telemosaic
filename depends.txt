@@ -1,4 +1,0 @@
-default
-doors
-dye?
-digilines?
