@@ -304,7 +304,7 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 	elseif state == "off" or player:get_player_control().sneak then
 		-- Allow player to build on telemosaic
 		local def = minetest.registered_nodes[item]
-		if def and def.on_place and not vector.equals(pos, pointed_thing.above) then
+		if def and def.on_place and pointed_thing and not vector.equals(pos, pointed_thing.above) then
 			-- Need to create a fake pointed_thing to prevent recursion
 			local new_pointed_thing = {
 				type = "node",
