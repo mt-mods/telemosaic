@@ -74,6 +74,7 @@ local function digiline_receive(pos, _, channel, msg)
 end
 
 telemosaic.digilines = {
+	receptor = {},
 	effector = {
 		action = digiline_receive
 	}
