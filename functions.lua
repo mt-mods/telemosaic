@@ -259,6 +259,7 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 	if player.is_fake_player or not minetest.is_player(player) then
 		return itemstack  -- No fake players!
 	end
+	if not itemstack then return end
 
 	local item = itemstack:get_name()
 	local player_name = player:get_player_name()
