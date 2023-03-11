@@ -256,7 +256,7 @@ function telemosaic.teleport(player, src, dest)
 end
 
 function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
-	if player.is_fake_player or not minetest.is_player(player) then
+	if not itemstack or player.is_fake_player or not minetest.is_player(player) then
 		return itemstack  -- No fake players!
 	end
 
