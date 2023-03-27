@@ -30,7 +30,8 @@ end
 
 
 function telemosaic.is_protected_beacon(pos, player_name)
-	if minetest.get_node(pos).name == "telemosaic:beacon_protected" then
+	local node_name = minetest.get_node(pos).name
+	if node_name:match("^telemosaic:beacon_.*protected$") then
 		if minetest.is_protected(pos, player_name) then
 			return true
 		end
@@ -156,6 +157,15 @@ function telemosaic.check_beacon(pos, player_name, all_checks)
 
 	if not all_checks then
 		return true  -- Skip the destination check
+	end
+	
+	if player_name then
+		if telemosaic.is_protected_beacon(dest, player_name) then
+			minetest.chat_send_player(player_name,
+				"Destination is protected."
+			)
+			return false
+		end
 	end
 
 	local valid, open = telemosaic.is_valid_destination(dest)
