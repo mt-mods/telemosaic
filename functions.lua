@@ -158,7 +158,7 @@ function telemosaic.check_beacon(pos, player_name, all_checks)
 	if not all_checks then
 		return true  -- Skip the destination check
 	end
-	
+
 	if player_name then
 		if telemosaic.is_protected_beacon(dest, player_name) then
 			minetest.chat_send_player(player_name,
