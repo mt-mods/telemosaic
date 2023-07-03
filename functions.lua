@@ -281,6 +281,8 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 				"You can only use a singular mese crystal fragment to create a telemosaic key."
 			)
 		else
+			minetest.log("action", "[telemosaic] " .. player_name .. " created a key for the telemosaic at "
+				.. minetest.pos_to_string(pos))
 			return ItemStack({name = "telemosaic:key", metadata = hash_pos(pos)})
 		end
 
@@ -304,6 +306,8 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 				-- Everything is good, set the destination and update the telemosaic
 				minetest.get_meta(pos):set_string("telemosaic:dest", dest_hash)
 				telemosaic.check_beacon(pos, player_name)
+				minetest.log("action", "[telemosaic] " .. player_name .. " set the destination pos of the telemosaic at "
+					.. minetest.pos_to_string(pos)  .. " to " .. minetest.pos_to_string(dest))
 			end
 			if player:get_player_control().sneak then
 				return itemstack  -- Don't destroy key
@@ -333,6 +337,8 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 		if telemosaic.check_beacon(pos, player_name, true) then
 			if telemosaic.travel_allowed(player, pos, dest) then
 				-- Teleport the player!
+				minetest.log("action", "[telemosaic] teleporting " .. player_name .. " from "
+					.. minetest.pos_to_string(pos) .. " to " .. minetest.pos_to_string(dest))
 				telemosaic.teleport(player, pos, dest)
 			else
 				minetest.chat_send_player(player_name,
