@@ -1,12 +1,16 @@
+local S = minetest.get_translator("telemosaic")
+local NS = function(s) return s end
 
 for _,protected in pairs({true, false}) do
 
 	local node_name_suffix = protected and "_protected" or ""
 	local texture_overlay = protected and "^telemosaic_beacon_protected_overlay.png" or ""
+	local description = protected and NS("Protected Telemosaic Beacon")
+		or NS("Telemosaic Beacon")
 	local description_prefix = protected and "Protected " or ""
 
 	minetest.register_node("telemosaic:beacon_off"..node_name_suffix, {
-		description = description_prefix.."Telemosaic Beacon",
+		description = S(description),
 		tiles = {
 			"telemosaic_beacon_off.png"..texture_overlay,
 			"telemosaic_beacon_side.png",
@@ -18,7 +22,8 @@ for _,protected in pairs({true, false}) do
 	})
 
 	minetest.register_node("telemosaic:beacon"..node_name_suffix, {
-		description = description_prefix.."Telemosaic Beacon Active (you hacker you!)",
+		description = S(description_prefix ..
+			"Telemosaic Beacon Active (you hacker you!)"),
 		tiles = {
 			"telemosaic_beacon_top.png"..texture_overlay,
 			"telemosaic_beacon_side.png",
@@ -31,7 +36,8 @@ for _,protected in pairs({true, false}) do
 	})
 
 	minetest.register_node("telemosaic:beacon_err"..node_name_suffix, {
-		description = description_prefix.."Telemosaic Beacon Error (you hacker you!)",
+		description = S(description_prefix ..
+			"Telemosaic Beacon Error (you hacker you!)"),
 		tiles = {
 			"telemosaic_beacon_err.png"..texture_overlay,
 			"telemosaic_beacon_side.png",
@@ -44,7 +50,8 @@ for _,protected in pairs({true, false}) do
 	})
 
 	minetest.register_node("telemosaic:beacon_disabled"..node_name_suffix, {
-		description = description_prefix.."Telemosaic Beacon Disabled (you hacker you!)",
+		description = S(description_prefix .. 
+			"Telemosaic Beacon Disabled (you hacker you!)"),
 		tiles = {
 			"telemosaic_beacon_disabled.png"..texture_overlay,
 			"telemosaic_beacon_side.png",

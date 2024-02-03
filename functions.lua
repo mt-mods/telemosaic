@@ -1,3 +1,4 @@
+local S = minetest.get_translator("telemosaic")
 
 -- Keeps a track of players to prevent teleport spamming
 local recent_teleports = {}
@@ -146,7 +147,7 @@ function telemosaic.check_beacon(pos, player_name, all_checks)
 		if player_name then
 			local needed = math.ceil(dist - range)
 			minetest.chat_send_player(player_name,
-				"You need to add extenders for "..needed.." nodes."
+				S("You need to add extenders for @1 node(s).", needed)
 			)
 		end
 		return false
@@ -162,7 +163,7 @@ function telemosaic.check_beacon(pos, player_name, all_checks)
 	if player_name then
 		if telemosaic.is_protected_beacon(dest, player_name) then
 			minetest.chat_send_player(player_name,
-				"Destination is protected."
+				S("Destination is protected.")
 			)
 			return false
 		end
@@ -172,14 +173,14 @@ function telemosaic.check_beacon(pos, player_name, all_checks)
 	if not valid then
 		if player_name then
 			minetest.chat_send_player(player_name,
-				"No telemosaic at destination."
+				S("No telemosaic at destination.")
 			)
 		end
 		return false
 	elseif not open then
 		if player_name then
 			minetest.chat_send_player(player_name,
-				"Destination is blocked."
+				S("Destination is blocked.")
 			)
 		end
 		return false
@@ -278,9 +279,10 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 		-- Try to create a telemosaic key
 		if itemstack:get_count() ~= 1 then
 			minetest.chat_send_player(player_name,
-				"You can only use a singular mese crystal fragment to create a telemosaic key."
+				S("You can only use a singular mese crystal fragment to create a telemosaic key.")
 			)
 		else
+			-- TODO: translations in the logs?
 			minetest.log("action", "[telemosaic] " .. player_name .. " created a key for the telemosaic at "
 				.. minetest.pos_to_string(pos))
 			return ItemStack({name = "telemosaic:key", metadata = hash_pos(pos)})
@@ -295,12 +297,12 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 			if not dest then
 				-- This should never happen, but tell the player if it does
 				minetest.chat_send_player(player_name,
-					"Telemosaic key is invalid."
+					S("Telemosaic key is invalid.")
 				)
 			elseif not telemosaic.is_valid_destination(dest) then
 				-- No point setting a destination that doesn't exist
 				minetest.chat_send_player(player_name,
-					"No telemosaic at new destination."
+					S("No telemosaic at new destination.")
 				)
 			else
 				-- Everything is good, set the destination and update the telemosaic
@@ -342,7 +344,7 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 				telemosaic.teleport(player, pos, dest)
 			else
 				minetest.chat_send_player(player_name,
-					"Travel to destination is not allowed."
+					S("Travel to destination is not allowed.")
 				)
 			end
 		end
@@ -350,7 +352,7 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 	elseif state == "disabled" then
 		-- Tell the player why they can't use this telemosaic
 		minetest.chat_send_player(player_name,
-			"Telemosaic is disabled."
+			S("Telemosaic is disabled.")
 		)
 
 	elseif state == "error" then

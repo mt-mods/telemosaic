@@ -1,0 +1,45 @@
+# textdomain: telemosaic
+##[ beacon.lua ]##
+Protected Telemosaic Beacon=Geschützte Telemosaik-Leuchtfeuer
+Telemosaic Beacon=Telemosaik-Leuchtfeuer
+Telemosaic Beacon Active (you hacker you!)=Telemosaik-Leuchtfeuer aktiv (du Hacker du!)
+Protected Telemosaic Beacon Active (you hacker you!)=Geschützte Telemosaik-Leuchtfeuer aktiv (du Hacker du!)
+Telemosaic Beacon Error (you hacker you!)=Telemosaik-Leuchtfeuer fehler (du Hacker du!)
+Protected Telemosaic Beacon Error (you hacker you!)=Geschützte Telemosaik-Leuchtfeuer fehler (du Hacker du!)
+Telemosaic Beacon Disabled (you hacker you!)=Telemosaik-Leuchtfeuer deaktiviert (du Hacker du!)
+Protected Telemosaic Beacon Disabled (you hacker you!)=Geschützte Telemosaik-Leuchtfeuer deaktiviert (du Hacker du!)
+
+##[ extender.lua ]##
+## oder Verlänger, Weiterung?
+Telemosaic Extender, Tier @1 (@2)=Telemosaik-Verstärker Stufe @1 (@2)
+Telemosaic Extender, Tier @1=Telemosaik-Vertstärker Stufe @1
+Grey=Graue
+# Aus MTG Wollen
+White=Weiße
+Dark Grey=Dunkelgraue
+Black=Schwarze
+Violet=Violette
+Blue=Blaue
+Cyan=Türkise
+Dark Green=Dunkgelgrüne
+Green=Grüne
+Yellow=Gelbe
+Brown=Braune
+Orange=Orange
+Red=Rote
+Magenta=Magenta
+Pink=Rosa
+
+##[ functions.lua ]##
+You need to add extenders for @1 node(s).=Sie müssen Verstärker für @1 Node(n) hinzufügen.
+Destination is protected.=Zielort ist geschützt.
+No telemosaic at destination.=Kein Telemosaik am Zielort.
+Destination is blocked.=Zielort ist versperrt.
+You can only use a singular mese crystal fragment to create a telemosaic key.=Sie können nur einen einzelnen Mesekristallfragment verwenden, um einen Telemosaik-Schlüssel zu erstellen.
+Telemosaic key is invalid.=Telemosaik-Schlüssel ist ungültig.
+No telemosaic at new destination.=Kein Telemosaik am neuen Zielort.
+Travel to destination is not allowed.=Reisen zum Zielort ist nicht erlaubt.
+Telemosaic is disabled.=Telemosaik ist deaktiviert.
+
+##[ key.lua ]##
+Telemosaic Key=Telemosaik-Schlüssel

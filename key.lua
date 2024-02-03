@@ -1,6 +1,7 @@
+local S = minetest.get_translator("telemosaic")
 
 minetest.register_tool("telemosaic:key", {
-	description = "Telemosaic Key",
+	description = S("Telemosaic Key"),
 	inventory_image = "telemosaic_key.png",
 	stack_max = 1,
 	groups = {not_in_creative_inventory = 1},
