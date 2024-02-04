@@ -50,7 +50,7 @@ for _,protected in pairs({true, false}) do
 	})
 
 	minetest.register_node("telemosaic:beacon_disabled"..node_name_suffix, {
-		description = S(description_prefix .. 
+		description = S(description_prefix ..
 			"Telemosaic Beacon Disabled (you hacker you!)"),
 		tiles = {
 			"telemosaic_beacon_disabled.png"..texture_overlay,
