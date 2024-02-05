@@ -1,5 +1,4 @@
 local S = minetest.get_translator("telemosaic")
-local NS = function(s) return s end
 
 local has_dye = minetest.get_modpath("dye")
 
@@ -23,9 +22,10 @@ for i, range in pairs(telemosaic.extender_ranges) do
 		common_desc = S("Telemosaic Extender, Tier @1 (@2)")
 		basic_desc = S(common_desc, i, S("Grey"))
 	else
-		common_desc = NS("Telemosaic Extender, Tier @1")
+		common_desc = "Telemosaic Extender, Tier @1"
 		basic_desc = S(common_desc, i)
 	end
+
 	minetest.register_node("telemosaic:extender_"..tier, {
 		description = basic_desc,
 		tiles = {

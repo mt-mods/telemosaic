@@ -10,11 +10,10 @@ Telemosaic Beacon Disabled (you hacker you!)=
 Protected Telemosaic Beacon Disabled (you hacker you!)=
 
 ##[ extender.lua ]##
-## oder Verlänger, Weiterung?
 Telemosaic Extender, Tier @1 (@2)=
 Telemosaic Extender, Tier @1=
 Grey=
-# Aus MTG Wollen
+# from MTG wool
 White=
 Dark Grey=
 Black=

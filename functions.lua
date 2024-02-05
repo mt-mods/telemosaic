@@ -282,8 +282,8 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 				S("You can only use a singular mese crystal fragment to create a telemosaic key.")
 			)
 		else
-			-- TODO: translations in the logs?
-			minetest.log("action", "[telemosaic] " .. player_name .. " created a key for the telemosaic at "
+			minetest.log("action", "[telemosaic] " .. player_name ..
+				" created a key for the telemosaic at "
 				.. minetest.pos_to_string(pos))
 			return ItemStack({name = "telemosaic:key", metadata = hash_pos(pos)})
 		end
