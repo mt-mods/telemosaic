@@ -19,7 +19,7 @@ for i, range in pairs(telemosaic.extender_ranges) do
 
 	local common_desc, basic_desc
 	if has_dye then
-		common_desc = S("Telemosaic Extender, Tier @1 (@2)")
+		common_desc = "Telemosaic Extender, Tier @1 (@2)"
 		basic_desc = S(common_desc, i, S("Grey"))
 	else
 		common_desc = "Telemosaic Extender, Tier @1"
