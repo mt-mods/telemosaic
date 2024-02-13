@@ -19,6 +19,16 @@ minetest.register_tool("telemosaic:key", {
 		end
 		return itemstack
 	end,
+	on_place = function(itemstack, player, pointed_thing)
+		-- Call on_rightclick, even if sneak is pressed
+		if pointed_thing.type == "node" and player then
+			local node = minetest.get_node(pointed_thing.under)
+			local def = minetest.registered_nodes[node.name]
+			if def and def.on_rightclick then
+				return def.on_rightclick(pointed_thing.under, node, player, itemstack, pointed_thing) or itemstack
+			end
+		end
+	end,
 })
 
 minetest.register_craft({
