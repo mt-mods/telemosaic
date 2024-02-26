@@ -33,6 +33,7 @@ for i, range in pairs(telemosaic.extender_ranges) do
 		},
 		paramtype = "light",
 		groups = {cracky = 2, telemosaic_extender = range, ["telemosaic_extender_"..tier] = 1},
+		is_ground_content = false,
 		after_place_node = telemosaic.extender_place,
 		after_dig_node = telemosaic.extender_dig,
 	})
@@ -55,6 +56,7 @@ for i, range in pairs(telemosaic.extender_ranges) do
 					cracky = 2, not_in_creative_inventory = 1,
 					telemosaic_extender = range, ["telemosaic_extender_"..tier] = 1
 				},
+				is_ground_content = false,
 				after_place_node = telemosaic.extender_place,
 				after_dig_node = telemosaic.extender_dig,
 			})
