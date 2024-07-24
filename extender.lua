@@ -36,6 +36,7 @@ for i, range in pairs(telemosaic.extender_ranges) do
 		is_ground_content = false,
 		after_place_node = telemosaic.extender_place,
 		after_dig_node = telemosaic.extender_dig,
+		sounds = default.node_sound_metal_defaults(),
 	})
 
 	if has_dye then
@@ -59,6 +60,7 @@ for i, range in pairs(telemosaic.extender_ranges) do
 				is_ground_content = false,
 				after_place_node = telemosaic.extender_place,
 				after_dig_node = telemosaic.extender_dig,
+				sounds = default.node_sound_metal_defaults(),
 			})
 
 			minetest.register_craft({

@@ -19,6 +19,7 @@ for _,protected in pairs({true, false}) do
 		is_ground_content = false,
 		on_rightclick = telemosaic.rightclick,
 		digilines = telemosaic.digilines,
+		sounds = default.node_sound_metal_defaults(),
 	})
 
 	minetest.register_node("telemosaic:beacon"..node_name_suffix, {
@@ -34,6 +35,7 @@ for _,protected in pairs({true, false}) do
 		drop = "telemosaic:beacon_off"..node_name_suffix,
 		on_rightclick = telemosaic.rightclick,
 		digilines = telemosaic.digilines,
+		sounds = default.node_sound_metal_defaults(),
 	})
 
 	minetest.register_node("telemosaic:beacon_err"..node_name_suffix, {
@@ -49,6 +51,7 @@ for _,protected in pairs({true, false}) do
 		drop = "telemosaic:beacon_off"..node_name_suffix,
 		on_rightclick = telemosaic.rightclick,
 		digilines = telemosaic.digilines,
+		sounds = default.node_sound_metal_defaults(),
 	})
 
 	minetest.register_node("telemosaic:beacon_disabled"..node_name_suffix, {
@@ -64,6 +67,7 @@ for _,protected in pairs({true, false}) do
 		drop = "telemosaic:beacon_off"..node_name_suffix,
 		on_rightclick = telemosaic.rightclick,
 		digilines = telemosaic.digilines,
+		sounds = default.node_sound_metal_defaults(),
 	})
 end
 
