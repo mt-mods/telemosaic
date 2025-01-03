@@ -290,7 +290,7 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 
 	elseif item == "telemosaic:key" then
 		-- Try to set a new destination
-		local dest_hash = itemstack:get_metadata()
+		local dest_hash = itemstack:get_meta():get_string("")
 		local src_hash = hash_pos(pos)
 		if dest_hash ~= src_hash and not minetest.is_protected(pos, player_name) then
 			local dest = unhash_pos(dest_hash)
