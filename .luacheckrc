@@ -8,8 +8,8 @@ read_globals = {
 	-- Stdlib
 	string = {fields = {"split"}},
 
-	-- Minetest
-	"minetest",
+	-- Luanti
+	"core", "minetest",
 	"vector", "ItemStack",
 
 	-- Deps

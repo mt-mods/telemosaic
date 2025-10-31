@@ -3,23 +3,19 @@ local S = minetest.get_translator("telemosaic")
 -- Keeps a track of players to prevent teleport spamming
 local recent_teleports = {}
 
-
--- Not the same as `minetest.hash_node_position` and `minetest.get_position_from_hash`
-local function hash_pos(pos)
-	return math.floor(pos.x + 0.5)..':'..
-		math.floor(pos.y + 0.5)..':'..
-		math.floor(pos.z + 0.5)
-end
-
-local function unhash_pos(hash)
-	local list = string.split(hash, ':')
-	local p = {
-		x = tonumber(list[1]),
-		y = tonumber(list[2]),
-		z = tonumber(list[3])
-	}
-	if p.x and p.y and p.z then
-		return p
+local function unpack_pos(pos)
+	if pos:find(":") then -- avoid breaking existing metadata
+		local list = string.split(pos, ':')
+		local p = {
+			x = tonumber(list[1]),
+			y = tonumber(list[2]),
+			z = tonumber(list[3])
+		}
+		if p.x and p.y and p.z then
+			return p
+		end
+	else
+		return core.string_to_pos(pos)
 	end
 end
 
@@ -121,10 +117,12 @@ function telemosaic.is_valid_destination(pos)
 	return valid, true
 end
 
-function telemosaic.check_beacon(pos, player_name, all_checks)
-	local meta = minetest.get_meta(pos)
+function telemosaic.get_destination(pos)
+	return unpack_pos(core.get_meta(pos):get_string("telemosaic:dest"))
+end
 
-	local dest = unhash_pos(meta:get_string("telemosaic:dest"))
+function telemosaic.check_beacon(pos, player_name, all_checks)
+	local dest = telemosaic.get_destination(pos)
 	local state = telemosaic.get_state(pos)
 	if not dest or state == "invalid" then
 		return false
@@ -189,18 +187,12 @@ function telemosaic.check_beacon(pos, player_name, all_checks)
 	return true
 end
 
-function telemosaic.get_destination(pos)
-	local dest_hash = minetest.get_meta(pos):get_string("telemosaic:dest")
-	return unhash_pos(dest_hash)
-end
-
 function telemosaic.set_destination(pos, dest)
-	local dest_hash = hash_pos(dest)
-	local src_hash = hash_pos(pos)
-	if src_hash == dest_hash or not telemosaic.is_valid_destination(dest) then
+	local dest_string = core.pos_to_string(dest)
+	if core.pos_to_string(pos) == dest_string or not telemosaic.is_valid_destination(dest) then
 		return  -- Don't allow setting invalid destination
 	end
-	minetest.get_meta(pos):set_string("telemosaic:dest", dest_hash)
+	core.get_meta(pos):set_string("telemosaic:dest", dest_string)
 	telemosaic.check_beacon(pos)
 end
 
@@ -285,15 +277,15 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 			minetest.log("action", "[telemosaic] " .. player_name ..
 				" created a key for the telemosaic at "
 				.. minetest.pos_to_string(pos))
-			return ItemStack({name = "telemosaic:key", metadata = hash_pos(pos)})
+			return ItemStack({name = "telemosaic:key", metadata = core.pos_to_string(pos)})
 		end
 
 	elseif item == "telemosaic:key" then
 		-- Try to set a new destination
-		local dest_hash = itemstack:get_meta():get_string("")
-		local src_hash = hash_pos(pos)
-		if dest_hash ~= src_hash and not minetest.is_protected(pos, player_name) then
-			local dest = unhash_pos(dest_hash)
+		local dest_string = itemstack:get_meta():get_string("")
+		local src_string = core.pos_to_string(pos)
+		if dest_string ~= src_string and not minetest.is_protected(pos, player_name) then
+			local dest = unpack_pos(dest_string)
 			if not dest then
 				-- This should never happen, but tell the player if it does
 				minetest.chat_send_player(player_name,
@@ -306,10 +298,10 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 				)
 			else
 				-- Everything is good, set the destination and update the telemosaic
-				minetest.get_meta(pos):set_string("telemosaic:dest", dest_hash)
+				minetest.get_meta(pos):set_string("telemosaic:dest", dest_string)
 				telemosaic.check_beacon(pos, player_name)
 				minetest.log("action", "[telemosaic] " .. player_name .. " set the destination pos of the telemosaic at "
-					.. minetest.pos_to_string(pos)  .. " to " .. minetest.pos_to_string(dest))
+					.. src_string  .. " to " .. dest_string)
 			end
 			if player:get_player_control().sneak then
 				return itemstack  -- Don't destroy key
@@ -334,8 +326,7 @@ function telemosaic.rightclick(pos, node, player, itemstack, pointed_thing)
 		if recent_teleports[player_name] then
 			return itemstack  -- Prevent teleport spamming, fail silently
 		end
-		local meta = minetest.get_meta(pos)
-		local dest = unhash_pos(meta:get_string("telemosaic:dest"))
+		local dest = telemosaic.get_destination(pos)
 		if telemosaic.check_beacon(pos, player_name, true) then
 			if telemosaic.travel_allowed(player, pos, dest) then
 				-- Teleport the player!
